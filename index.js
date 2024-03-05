@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
+
 const app = express();
 const port = 3000;
 
@@ -13,10 +14,11 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // URL de conexión a tu base de datos MongoDB Atlas
+// "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido"
 const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido";
 
 // Ruta para recibir datos desde la ESP32
-app.post('/app/data-afnpg/endpoint/EcoNido', async (req, res) => {
+app.post('/app/application-0-laqjr/endpoint/SensorData', async (req, res) => {
   const data = req.body;
 
   try {
@@ -44,7 +46,18 @@ app.post('/app/data-afnpg/endpoint/EcoNido', async (req, res) => {
   }
 });
 
+// Manejar errores 404 para rutas no encontradas
+app.use((req, res, next) => {
+  res.status(404).send("Ruta no encontrada");
+});
+
+// Manejar errores 500
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Error del servidor');
+});
+
 // Iniciar el servidor
 app.listen(port, () => {
-  console.log(`Servidor Node.js escuchando en http:localhost:${port}`);
+  console.log(`Servidor Node.js escuchando en http://localhost:${port}`);
 });
