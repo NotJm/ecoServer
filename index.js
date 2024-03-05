@@ -9,7 +9,7 @@ const port = 3000;
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // URL de conexión a tu base de datos MongoDB Atlas
-const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido";
+const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/EcoNido?retryWrites=true&w=majority";
 
 // Ruta para recibir datos desde la ESP32
 app.post('/app/data-afnpg/endpoint/EcoNido', async (req, res) => {
