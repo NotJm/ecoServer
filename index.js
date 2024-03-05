@@ -18,7 +18,7 @@ app.use(cors());
 const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido";
 
 // Ruta para recibir datos desde la ESP32
-app.post('/app/application-0-laqjr/endpoint/SensorData', async (req, res) => {
+app.post('/app/data-afnpg/endpoint/EcoNido', async (req, res) => {
   const data = req.body;
 
   try {
