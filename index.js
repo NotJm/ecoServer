@@ -1,12 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
-
+const cors = require('cors');
 const app = express();
 const port = 3000;
 
 // Configurar middleware para analizar el cuerpo de las solicitudes HTTP
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Configurar CORS para permitir solicitudes desde cualquier origen
+app.use(cors());
 
 // URL de conexión a tu base de datos MongoDB Atlas
 const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido";
