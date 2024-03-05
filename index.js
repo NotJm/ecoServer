@@ -40,29 +40,6 @@ app.post('/app/data-afnpg/endpoint/EcoNido', async (req, res) => {
   }
 });
 
-// Nueva ruta para obtener todos los datos almacenados
-app.get('/app/data-afnpg/endpoint/EcoNido', async (req, res) => {
-  try {
-    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log("Conexión exitosa a MongoDB Atlas");
-
-    const db = client.db("EcoNido");
-    const collection = db.collection("dispositivo");
-
-    // Obtener todos los documentos de la colección
-    const result = await collection.find({}).toArray();
-    
-    client.close();
-    console.log("Conexión cerrada");
-
-    res.json(result); // Devolver los datos como respuesta en formato JSON
-  } catch (error) {
-    console.error("Error al conectar a MongoDB Atlas:", error);
-    res.status(500).send("Error al conectar a la base de datos");
-  }
-});
-
-
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor Node.js escuchando en http:localhost:${port}`);
