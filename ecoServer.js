@@ -121,7 +121,8 @@ app.post('/user/login', async (req, res) => {
     if(!Array.isArray(exists)) {
       res.status(401).json({status:false});
     } else {
-      res.status(200).json({status:true});
+      const { permisos } = exists;
+      res.status(200).json({status:true, tipo: permisos});
     }
 
   } catch (error) {
