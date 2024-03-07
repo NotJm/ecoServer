@@ -100,7 +100,7 @@ app.get('/user', async (req, res) => {
   }
 });
 
-app.get('/user/login', async (req, res) => {
+app.post('/user/login', async (req, res) => {
   const data = req.query;
   try {
     // Validacion de datos
