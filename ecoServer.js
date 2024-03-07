@@ -49,7 +49,7 @@ app.post('/deivce', async (req, res) => {
       // Actualiza datos si ya existe dispositivo
       await deviceCollection.updateOne(data);
     }
-    
+
     // Historial de dispositivo
     await deviceHistoryCollection.insertOne(data);
 
@@ -65,7 +65,7 @@ app.post('/deivce', async (req, res) => {
   }
 });
 
-// Ruta para recibir datos de mi ecoWeb 
+// Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
 app.get('/user', async (req, res) => {
   const data = req.query;
   try {
@@ -93,8 +93,46 @@ app.get('/user', async (req, res) => {
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
+  } finally {
+    if (client) {
+      client.close();
+    }
   }
 });
+
+app.get('/user/login', async (req, res) => {
+  const data = req.query;
+  try {
+    // Validacion de datos
+    const { username, password } = data;
+    if (!username || !password) {
+      return res.status(400).send('Falta información de autenticación');
+    }
+
+    // Conectar a la base de datos MongoDBAtlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexion exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y las colecciones
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    const exists = await userCollection.find({ username: username, password: password}).toArray();
+    if(!Array.isArray(exists)) {
+      res.status(401).json({status:false});
+    } else {
+      res.status(200).json({status:true});
+    }
+
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  } finally {
+    if (client) {
+      client.close();
+    }
+  }
+})
 
 // Manejo MQTT peticiones
 const listen = (state, topic) => {
@@ -107,7 +145,7 @@ const listen = (state, topic) => {
 app.get("/mqtt", (req, res) => {
   const { state, topic } = req.query;
 
-  if(!state || (state !== "ON" && state !== "OFF")) {
+  if (!state || (state !== "ON" && state !== "OFF")) {
     return res.status(400).send("Parametros Invalidos");
   }
 
