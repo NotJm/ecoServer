@@ -6,7 +6,7 @@ const mqtt = require("mqtt");
 // Modulos utilizados
 
 const app = express();
-const port = 3100;
+const port = 3000;
 // Configuracion del puerto
 
 // Configurar middleware para analizar el cuerpo de las solicitudes HTTP
