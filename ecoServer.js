@@ -135,21 +135,21 @@ app.post('/user/login', async (req, res) => {
 })
 
 // Manejo MQTT peticiones
-const listen = (state, topic) => {
-  const message = state === "ON" ? "ON" : "OFF";
-  mqttClient.publish(topic, message);
+const listen = (state) => {
+  const message = state === "lightON" ? "lightON" : "lightOFF";
+  mqttClient.publish("ecoTopic", message);
   console.log("Mensaje Enviado Sactifactoriamente");
 }
 
 // Manejo MQTT GET
 app.get("/mqtt", (req, res) => {
-  const { state, topic } = req.query;
+  const { state } = req.query;
 
-  if (!state || (state !== "ON" && state !== "OFF")) {
+  if (!state || (state !== "lightON" && state !== "lightOFF")) {
     return res.status(400).send("Parametros Invalidos");
   }
 
-  listen(state, topic);
+  listen(state);
 
 });
 
