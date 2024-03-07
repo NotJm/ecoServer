@@ -101,7 +101,7 @@ app.get('/user', async (req, res) => {
 });
 
 app.post('/user/login', async (req, res) => {
-  const data = req.query;
+  const data = req.body;
   try {
     // Validacion de datos
     const { username, password } = data;
