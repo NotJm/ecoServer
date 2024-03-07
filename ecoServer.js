@@ -142,8 +142,8 @@ const listen = (state) => {
 }
 
 // Manejo MQTT GET
-app.get("/mqtt", (req, res) => {
-  const { state } = req.query;
+app.post("/mqtt", (req, res) => {
+  const { state } = req.body;
 
   if (!state || (state !== "lightON" && state !== "lightOFF")) {
     return res.status(400).send("Parametros Invalidos");
