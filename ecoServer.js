@@ -65,6 +65,37 @@ app.post('/deivce', async (req, res) => {
   }
 });
 
+app.post('/device/sensor', async (req, res) => {
+  const data = req.query;
+  try {
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexion exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y las colecciones
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("device");
+
+    // Primero se comprueba si no existe el usuario
+    const { mac } = data;
+    const exists = await userCollection.find({ mac: mac }).toArray();
+
+    if (!Array.isArray(exists)) {
+      res.status(404).send("No se encontro el dispositivo");
+    } else {
+      res.json(exists);
+    }
+
+    res.send("Regresando datos del dispositivo");
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  } finally {
+    if (client) {
+      client.close();
+    }
+  }
+})
+
 // Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
 app.get('/user', async (req, res) => {
   const data = req.query;
@@ -117,12 +148,12 @@ app.post('/user/login', async (req, res) => {
     const db = client.db("EcoNido");
     const userCollection = db.collection("users");
 
-    const exists = await userCollection.find({ username: username, password: password}).toArray();
-    if(!Array.isArray(exists)) {
-      res.status(401).json({status:false});
+    const exists = await userCollection.find({ username: username, password: password }).toArray();
+    if (!Array.isArray(exists)) {
+      res.status(401).json({ status: false });
     } else {
       const { permisos } = exists;
-      res.status(200).json({status:true, tipo: permisos});
+      res.status(200).json({ status: true, tipo: permisos });
     }
 
   } catch (error) {
