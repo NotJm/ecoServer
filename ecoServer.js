@@ -17,6 +17,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // URL de conexión a tu base de datos MongoDB Atlas
+//"mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido"
+// mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido
 const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido";
 
 // Cliente MQTT
@@ -35,11 +37,11 @@ app.get('/device', async (req, res) => {
     // Obtener una referencia a la base de datos y la colección
     const db = client.db("EcoNido");
     const deviceCollection = db.collection("device");
-    const deviceHistoryCollection = db.collection("device");
+    const deviceHistoryCollection = db.collection("deviceHistory");
 
     // Antes de isnertar los datos hay que comprobar que no haya un dispositivo existente
     const { mac } = data;
-    const existsDevice = await deviceCollection.find({ mac: mac }).toArray();
+    const existsDevice = await deviceCollection.findOne({ mac: mac }).toArray();
 
     // Comprobacion de dispositivo
     if (!Array.isArray(existsDevice)) {
