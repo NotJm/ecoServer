@@ -175,8 +175,9 @@ const listen = (state) => {
 
 // Manejo MQTT POST
 app.post('/mqtt', (req, res) => {
-  const { state } = req.body;
+  console.log('Body:', req.body);
 
+  const { state } = req.body;
   if (!state || !['lightON', 'lightOFF', 'fanON', 'fanOFF'].includes(state)) {
     return res.status(400).send('Parámetros inválidos');
   }
