@@ -24,7 +24,7 @@ const mqttClient = mqtt.connect("mqtt://broker.hivemq.com");
 
 
 // Ruta para recibir datos desde la ESP32
-app.post('/deivce', async (req, res) => {
+app.post('/device', async (req, res) => {
   const data = req.body;
 
   try {
