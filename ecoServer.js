@@ -67,7 +67,7 @@ app.post('/insertDevice', async (req, res) => {
 });
 
 app.post('/device/sensor', async (req, res) => {
-  const data = req.query;
+  const data = req.body;
   try {
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log("Conexion exitosa a MongoDB Atlas");
