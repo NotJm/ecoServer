@@ -96,36 +96,35 @@ app.post('/device/sensor', async (req, res) => {
 // Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
 app.post('/user', async (req, res) => {
   const data = req.body;
+  let client; // Declarar la variable client fuera del bloque try para que pueda cerrarse en el bloque finally
+
   try {
-    // Conectar  a la base de datos MongoDBAtlas
-    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log("Conexion exitosa a MongoDB Atlas");
+    // Conectar a la base de datos MongoDBAtlas
+    client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
 
     // Obtener una referencia a la base de datos y las colecciones
     const db = client.db("EcoNido");
     const userCollection = db.collection("users");
 
-    // Primero se comprueba si no existe el usuario
+    // Comprobar si no existe el usuario
     const { username } = data;
-    const exists = await userCollection.find({ username: username }).toArray();
+    const exists = await userCollection.findOne({ username: username });
 
-    if (!Array.isArray(exists)) {
+    if (!exists) {
       await userCollection.insertOne(data);
-      res.send("Datos registrado satisfactoriamente");
+      res.send("Datos registrados satisfactoriamente");
     } else {
       res.send("Los datos enviados ya existen");
     }
 
-    res.send("Datos recibidos del usuario");
-
-    client.close();
+    console.log("Datos recibidos del usuario");
 
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
-  }
+  } 
 });
-
 app.post('/user/login', async (req, res) => {
   const data = req.body;
   try {
