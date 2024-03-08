@@ -63,7 +63,7 @@ app.get('/insertDevice', async (req, res) => {
     res.send("Datos recibidos y guardados en la base de datos");
   } catch (error) {
     console.error("Error al conectar a MongoDB Atlas:", error);
-    res.status(500).send("Error al conectar a la base de datos");
+    res.status(500).send("Error al conectar a la base de datos," + error);
   }
 });
 
