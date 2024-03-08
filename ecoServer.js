@@ -40,16 +40,16 @@ app.post('/insertDevice', async (req, res) => {
     const deviceHistoryCollection = db.collection("deviceHistory");
 
     const { mac } = data;
-const existsDevice = await deviceCollection.findOne({ mac: mac });
+    const existsDevice = await deviceCollection.findOne({ mac: mac });
 
-// Comprobación de dispositivo
-if (!existsDevice) {
-  // Insertar los datos en la colección si no existe
-  await deviceCollection.insertOne(data);
-} else {
-  // Actualizar datos si ya existe el dispositivo
-  await deviceCollection.updateOne({ mac: mac }, { $set: data });
-}
+    // Comprobación de dispositivo
+    if (!existsDevice) {
+      // Insertar los datos en la colección si no existe
+      await deviceCollection.insertOne(data);
+    } else {
+      // Actualizar datos si ya existe el dispositivo
+      await deviceCollection.updateOne({ mac: mac }, { $set: data });
+    }
 
     // Historial de dispositivo
     await deviceHistoryCollection.insertOne(data);
@@ -85,13 +85,11 @@ app.post('/device/sensor', async (req, res) => {
     } else {
       res.json(exists);
     }
+
+    client.close();
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
-  } finally {
-    if (client) {
-      client.close();
-    }
   }
 });
 
@@ -120,13 +118,11 @@ app.get('/user', async (req, res) => {
 
     res.send("Datos recibidos del usuario");
 
+    client.close();
+
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
-  } finally {
-    if (client) {
-      client.close();
-    }
   }
 });
 
@@ -152,16 +148,13 @@ app.post('/user/login', async (req, res) => {
       res.status(401).json({ status: false });
     } else {
       const { permisos, dispositivo } = exists;
-      res.status(200).json({ status: true, tipo: permisos, dispositivo:dispositivo });
+      res.status(200).json({ status: true, tipo: permisos, dispositivo: dispositivo });
     }
+    client.close();
 
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
-  } finally {
-    if (client) {
-      client.close();
-    }
   }
 })
 
