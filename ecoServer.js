@@ -149,12 +149,12 @@ app.post('/user/login', async (req, res) => {
     const db = client.db("EcoNido");
     const userCollection = db.collection("users");
 
-    const exists = await userCollection.find({ username: username, password: password }).toArray();
-    if (!Array.isArray(exists)) {
+    const exists = await userCollection.findOne({ username: username, password: password });
+    if (!exists) {
       res.status(401).json({ status: false });
     } else {
-      const { permisos } = exists;
-      res.status(200).json({ status: true, tipo: permisos });
+      const { permisos, dispositivo } = exists;
+      res.status(200).json({ status: true, tipo: permisos, dispositivo:dispositivo });
     }
 
   } catch (error) {
