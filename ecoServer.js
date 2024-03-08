@@ -85,8 +85,6 @@ app.post('/device/sensor', async (req, res) => {
     } else {
       res.json(exists);
     }
-
-    res.send("Regresando datos del dispositivo");
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
@@ -95,7 +93,7 @@ app.post('/device/sensor', async (req, res) => {
       client.close();
     }
   }
-})
+});
 
 // Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
 app.get('/user', async (req, res) => {
