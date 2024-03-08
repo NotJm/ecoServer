@@ -39,18 +39,17 @@ app.get('/insertDevice', async (req, res) => {
     const deviceCollection = db.collection("device");
     const deviceHistoryCollection = db.collection("deviceHistory");
 
-    // Antes de isnertar los datos hay que comprobar que no haya un dispositivo existente
     const { mac } = data;
-    const existsDevice = await deviceCollection.find({ mac: mac }).toArray();
+const existsDevice = await deviceCollection.findOne({ mac: mac });
 
-    // Comprobacion de dispositivo
-    if (!Array.isArray(existsDevice)) {
-      // Insertar los datos en la colección si no existe
-      await deviceCollection.insertOne(data);
-    } else {
-      // Actualiza datos si ya existe dispositivo
-      await deviceCollection.updateOne(data);
-    }
+// Comprobación de dispositivo
+if (!existsDevice) {
+  // Insertar los datos en la colección si no existe
+  await deviceCollection.insertOne(data);
+} else {
+  // Actualizar datos si ya existe el dispositivo
+  await deviceCollection.updateOne({ mac: mac }, { $set: data });
+}
 
     // Historial de dispositivo
     await deviceHistoryCollection.insertOne(data);
