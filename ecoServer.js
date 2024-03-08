@@ -169,21 +169,20 @@ app.post('/user/login', async (req, res) => {
 
 // Manejo MQTT peticiones
 const listen = (state) => {
-  const message = state === "lightON" ? "lightON" : "lightOFF";
-  mqttClient.publish("ecoTopic", message);
-  console.log("Mensaje Enviado Sactifactoriamente");
-}
+  mqttClient.publish('ecoTopic', state);
+  console.log(`Mensaje "${state}" enviado al topic "ecoTopic" satisfactoriamente`);
+};
 
-// Manejo MQTT GET
-app.post("/mqtt", (req, res) => {
+// Manejo MQTT POST
+app.post('/mqtt', (req, res) => {
   const { state } = req.body;
 
-  if (!state || (state !== "lightON" && state !== "lightOFF")) {
-    return res.status(400).send("Parametros Invalidos");
+  if (!state || !['lightON', 'lightOFF', 'fanON', 'fanOFF'].includes(state)) {
+    return res.status(400).send('Parámetros inválidos');
   }
 
   listen(state);
-
+  res.status(200).send('Mensaje recibido correctamente');
 });
 
 
