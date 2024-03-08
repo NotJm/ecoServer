@@ -94,8 +94,8 @@ app.post('/device/sensor', async (req, res) => {
 });
 
 // Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
-app.get('/user', async (req, res) => {
-  const data = req.query;
+app.post('/user', async (req, res) => {
+  const data = req.body;
   try {
     // Conectar  a la base de datos MongoDBAtlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
