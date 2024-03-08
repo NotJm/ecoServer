@@ -74,13 +74,13 @@ app.post('/device/sensor', async (req, res) => {
 
     // Obtener una referencia a la base de datos y las colecciones
     const db = client.db("EcoNido");
-    const userCollection = db.collection("device");
+    const deviceCollection = db.collection("device");
 
     // Primero se comprueba si no existe el usuario
     const { mac } = data;
-    const exists = await userCollection.find({ mac: mac }).toArray();
+    const exists = await deviceCollection.findOne({ mac: mac });
 
-    if (!Array.isArray(exists)) {
+    if (!exists) {
       res.status(404).send("No se encontro el dispositivo");
     } else {
       res.json(exists);
