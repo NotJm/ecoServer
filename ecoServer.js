@@ -26,8 +26,8 @@ const mqttClient = mqtt.connect("mqtt://broker.hivemq.com");
 
 
 // Ruta para recibir datos desde la ESP32
-app.get('/insertDevice', async (req, res) => {
-  const data = req.query;
+app.post('/insertDevice', async (req, res) => {
+  const data = req.body;
 
   try {
     // Conectar a la base de datos MongoDB Atlas
