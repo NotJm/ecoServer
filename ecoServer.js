@@ -41,7 +41,7 @@ app.get('/insertDevice', async (req, res) => {
 
     // Antes de isnertar los datos hay que comprobar que no haya un dispositivo existente
     const { mac } = data;
-    const existsDevice = await deviceCollection.findOne({ mac: mac }).toArray();
+    const existsDevice = await deviceCollection.find({ mac: mac }).toArray();
 
     // Comprobacion de dispositivo
     if (!Array.isArray(existsDevice)) {
