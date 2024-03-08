@@ -80,8 +80,8 @@ app.post('/device/sensor', async (req, res) => {
     const { mac } = data;
     const exists = await deviceCollection.findOne({ mac: mac });
 
-    if (exists) {
-      res.status(404).send("No se encontro el dispositivo");
+    if (!exists) {
+      res.status(404).send("No se encontro el dispositivo:" + mac);
     } else {
       res.json(exists);
     }
