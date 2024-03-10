@@ -6,7 +6,7 @@ const mqtt = require("mqtt");
 // Modulos utilizados
 
 const app = express();
-const port = 3100;
+const port = 8080;
 // Configuracion del puerto
 
 // Configurar middleware para analizar el cuerpo de las solicitudes HTTP
@@ -100,8 +100,8 @@ app.get('/user', async (req, res) => {
   }
 });
 
-app.get('/user/login', async (req, res) => {
-  const data = req.query;
+app.post('/user/login', async (req, res) => {
+  const data = req.body;
   try {
     // Validacion de datos
     const { username, password } = data;
@@ -121,7 +121,8 @@ app.get('/user/login', async (req, res) => {
     if(!Array.isArray(exists)) {
       res.status(401).json({status:false});
     } else {
-      res.status(200).json({status:true});
+      const { permisos } = exists;
+      res.status(200).json({status:true, tipo: permisos});
     }
 
   } catch (error) {
@@ -135,21 +136,21 @@ app.get('/user/login', async (req, res) => {
 })
 
 // Manejo MQTT peticiones
-const listen = (state, topic) => {
-  const message = state === "ON" ? "ON" : "OFF";
-  mqttClient.publish(topic, message);
+const listen = (state) => {
+  const message = state === "lightON" ? "lightON" : "lightOFF";
+  mqttClient.publish("ecoTopic", message);
   console.log("Mensaje Enviado Sactifactoriamente");
 }
 
 // Manejo MQTT GET
-app.get("/mqtt", (req, res) => {
-  const { state, topic } = req.query;
+app.post("/mqtt", (req, res) => {
+  const { state } = req.body;
 
-  if (!state || (state !== "ON" && state !== "OFF")) {
+  if (!state || (state !== "lightON" && state !== "lightOFF")) {
     return res.status(400).send("Parametros Invalidos");
   }
 
-  listen(state, topic);
+  listen(state);
 
 });
 
