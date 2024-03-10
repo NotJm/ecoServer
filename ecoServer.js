@@ -17,6 +17,8 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // URL de conexión a tu base de datos MongoDB Atlas
+//"mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido"
+// mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido
 const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido";
 
 // Cliente MQTT
@@ -24,7 +26,7 @@ const mqttClient = mqtt.connect("mqtt://broker.hivemq.com");
 
 
 // Ruta para recibir datos desde la ESP32
-app.post('/deivce', async (req, res) => {
+app.post('/insertDevice', async (req, res) => {
   const data = req.body;
 
   try {
@@ -35,19 +37,18 @@ app.post('/deivce', async (req, res) => {
     // Obtener una referencia a la base de datos y la colección
     const db = client.db("EcoNido");
     const deviceCollection = db.collection("device");
-    const deviceHistoryCollection = db.collection("device");
+    const deviceHistoryCollection = db.collection("deviceHistory");
 
-    // Antes de isnertar los datos hay que comprobar que no haya un dispositivo existente
     const { mac } = data;
-    const existsDevice = await deviceCollection.find({ mac: mac }).toArray();
+    const existsDevice = await deviceCollection.findOne({ mac: mac });
 
-    // Comprobacion de dispositivo
-    if (!Array.isArray(existsDevice)) {
+    // Comprobación de dispositivo
+    if (!existsDevice) {
       // Insertar los datos en la colección si no existe
       await deviceCollection.insertOne(data);
     } else {
-      // Actualiza datos si ya existe dispositivo
-      await deviceCollection.updateOne(data);
+      // Actualizar datos si ya existe el dispositivo
+      await deviceCollection.updateOne({ mac: mac }, { $set: data });
     }
 
     // Historial de dispositivo
@@ -61,45 +62,69 @@ app.post('/deivce', async (req, res) => {
     res.send("Datos recibidos y guardados en la base de datos");
   } catch (error) {
     console.error("Error al conectar a MongoDB Atlas:", error);
-    res.status(500).send("Error al conectar a la base de datos");
+    res.status(500).send("Error al conectar a la base de datos," + error);
   }
 });
 
-// Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
-app.get('/user', async (req, res) => {
-  const data = req.query;
+app.post('/device/sensor', async (req, res) => {
+  const data = req.body;
   try {
-    // Conectar  a la base de datos MongoDBAtlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log("Conexion exitosa a MongoDB Atlas");
 
     // Obtener una referencia a la base de datos y las colecciones
     const db = client.db("EcoNido");
-    const userCollection = db.collection("users");
+    const deviceCollection = db.collection("device");
 
     // Primero se comprueba si no existe el usuario
-    const { username } = data;
-    const exists = await userCollection.find({ username: username }).toArray();
+    const { mac } = data;
+    const exists = await deviceCollection.findOne({ mac: mac });
 
-    if (!Array.isArray(exists)) {
+    if (!exists) {
+      res.status(404).send("No se encontro el dispositivo:" + mac);
+    } else {
+      res.json(exists);
+    }
+
+    client.close();
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
+// Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
+app.post('/user', async (req, res) => {
+  const data = req.body;
+  let client; // Declarar la variable client fuera del bloque try para que pueda cerrarse en el bloque finally
+
+  try {
+    // Conectar a la base de datos MongoDBAtlas
+    client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y las colecciones
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Comprobar si no existe el usuario
+    const { username } = data;
+    const exists = await userCollection.findOne({ username: username });
+
+    if (!exists) {
       await userCollection.insertOne(data);
-      res.send("Datos registrado satisfactoriamente");
+      res.send("Datos registrados satisfactoriamente");
     } else {
       res.send("Los datos enviados ya existen");
     }
 
-    res.send("Datos recibidos del usuario");
+    console.log("Datos recibidos del usuario");
 
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
-  } finally {
-    if (client) {
-      client.close();
-    }
-  }
+  } 
 });
-
 app.post('/user/login', async (req, res) => {
   const data = req.body;
   try {
@@ -117,41 +142,38 @@ app.post('/user/login', async (req, res) => {
     const db = client.db("EcoNido");
     const userCollection = db.collection("users");
 
-    const exists = await userCollection.find({ username: username, password: password}).toArray();
-    if(!Array.isArray(exists)) {
-      res.status(401).json({status:false});
+    const exists = await userCollection.findOne({ username: username, password: password });
+    if (!exists) {
+      res.status(401).json({ status: false });
     } else {
-      const { permisos } = exists;
-      res.status(200).json({status:true, tipo: permisos});
+      const { permisos, dispositivo } = exists;
+      res.status(200).json({ status: true, tipo: permisos, dispositivo: dispositivo });
     }
+    client.close();
 
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
-  } finally {
-    if (client) {
-      client.close();
-    }
   }
 })
 
 // Manejo MQTT peticiones
 const listen = (state) => {
-  const message = state === "lightON" ? "lightON" : "lightOFF";
-  mqttClient.publish("ecoTopic", message);
-  console.log("Mensaje Enviado Sactifactoriamente");
-}
+  mqttClient.publish('ecoTopic', state);
+  console.log(`Mensaje "${state}" enviado al topic "ecoTopic" satisfactoriamente`);
+};
 
-// Manejo MQTT GET
-app.post("/mqtt", (req, res) => {
+// Manejo MQTT POST
+app.post('/mqtt', (req, res) => {
+  console.log('Body:', req.body);
+
   const { state } = req.body;
-
-  if (!state || (state !== "lightON" && state !== "lightOFF")) {
-    return res.status(400).send("Parametros Invalidos");
+  if (!state || !['lightON', 'lightOFF', 'fanON', 'fanOFF'].includes(state)) {
+    return res.status(400).send('Parámetros inválidos');
   }
 
   listen(state);
-
+  res.status(200).send('Mensaje recibido correctamente');
 });
 
 
