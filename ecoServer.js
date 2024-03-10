@@ -16,9 +16,7 @@ app.use(bodyParser.json());
 // Configurar CORS para permitir solicitudes desde cualquier origen
 app.use(cors());
 
-// URL de conexión a tu base de datos MongoDB Atlas
-//"mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido"
-// mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido
+
 const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido";
 
 // Cliente MQTT
@@ -66,6 +64,7 @@ app.post('/insertDevice', async (req, res) => {
   }
 });
 
+// Para peticiones de sensoresz
 app.post('/device/sensor', async (req, res) => {
   const data = req.body;
   try {
@@ -92,6 +91,52 @@ app.post('/device/sensor', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
+
+
+// Para peticiones de contactos
+app.post('/user/contacto', async (req, res) => {
+  const data = req.body;
+  try {
+    const client = await MongoClient.connect(
+      mongoUrl,
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    );
+    console.log("Conexion exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y las colecciones
+    const db = client.db("EcoNido");
+    const questionCollection = db.collection("preguntas");
+
+    // Primero se comprueba si no existe el usuario
+    const { email } = data;
+    const exists = await questionCollection.findOne({ email: email });
+
+    if (!exists) {
+      questionCollection.insertOne(data);
+      res.json({
+        title: "Question insert",
+        message: "Success",
+        status: true,
+      })
+    } else {
+      res.json({
+        title: "Question exists",
+        message: "Failed",
+        status: false,
+      })
+    }
+
+    client.close();
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+})
+
+// Para peticioens de empresas
 
 // Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
 app.post('/user', async (req, res) => {
@@ -123,8 +168,10 @@ app.post('/user', async (req, res) => {
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
-  } 
+  }
 });
+
+// Para peticiones de login
 app.post('/user/login', async (req, res) => {
   const data = req.body;
   try {
@@ -156,6 +203,91 @@ app.post('/user/login', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 })
+
+// Para peticiones de edicion y eliminacion
+app.post('/user/edit', async (req, res) => {
+  const data = req.body;
+
+  try {
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexion exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección de usuarios
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Comprobar si el usuario existe
+    const { username } = data;
+    const existingUser = await userCollection.findOne({ username: username });
+
+    if (!existingUser) {
+      res.status(404).json({ status: false, message: 'Usuario no encontrado' });
+    } else {
+      // Realizar la acción de edición (actualización)
+      await userCollection.updateOne({ username: username }, { $set: data });
+      res.status(200).json({ status: true, message: 'Usuario actualizado con éxito' });
+    }
+
+    client.close();
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).json({ status: false, message: 'Error al conectar a la base de datos' });
+  }
+});
+
+app.post('/user/delete', async (req, res) => {
+  const data = req.body;
+
+  try {
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexion exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección de usuarios
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Comprobar si el usuario existe
+    const { username } = data;
+    const existingUser = await userCollection.findOne({ username: username });
+
+    if (!existingUser) {
+      res.status(404).json({ status: false, message: 'Usuario no encontrado' });
+    } else {
+      // Realizar la acción de eliminación
+      await userCollection.deleteOne({ username: username });
+      res.status(200).json({ status: true, message: 'Usuario eliminado con éxito' });
+    }
+
+    client.close();
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).json({ status: false, message: 'Error al conectar a la base de datos' });
+  }
+});
+
+// Para obtener todos los usuarios
+app.get('/user/manage', async (req, res) => {
+  try {
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección de usuarios
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Obtener todos los usuarios
+    const allUsers = await userCollection.find({}).toArray();
+
+    res.status(200).json(allUsers);
+    
+    client.close();
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).json({ status: false, message: 'Error al conectar a la base de datos' });
+  }
+});
+
+
 
 // Manejo MQTT peticiones
 const listen = (state) => {
