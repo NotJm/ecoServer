@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const mqtt = require("mqtt");
 // Modulos utilizados
@@ -304,7 +304,7 @@ app.get('/productos', async (req, res) => {
     const productoCollection = db.collection("products");
 
     // Realizar la consulta a la colecciÃ³n de usuarios
-    const products = await collection.find({}).toArray();
+    const products = await productoCollection.find({}).toArray();
 
     // Cerrar la conexiÃ³n
     client.close();
@@ -315,6 +315,75 @@ app.get('/productos', async (req, res) => {
   } catch (error) {
     console.error("Error al obtener productos:", error);
     res.status(500).send("Error al obtener productos");
+  }
+});
+
+// Actualizar un producto existente
+app.put('/productosedit/:id', async (req, res) => {
+  const productId = req.params.id; // Obtener el ID del usuario a editar desde los parÃ¡metros de la solicitud
+  const productData = req.body; // Obtener los datos del usuario a editar desde el cuerpo de la solicitud
+  console.log(productId);
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colecciÃ³n
+    const db = client.db("EcoNido");
+    const productCollection = db.collection("products");
+
+    // Realizar la actualizaciÃ³n del usuario en la colecciÃ³n
+    const result = await productCollection.updateOne({ _id: new ObjectId(productId) }, { $set: productData });
+
+    // Verificar si se actualizÃ³ el usuario correctamente
+    if (result.modifiedCount === 1) {
+      console.log("Usuario actualizado correctamente.");
+      res.status(200).send("Usuario actualizado correctamente.");
+    } else {
+      console.log("El usuario no pudo ser encontrado o actualizado.");
+      res.status(404).send("El usuario no pudo ser encontrado o actualizado.");
+    }
+
+    // Cerrar la conexiÃ³n
+    client.close();
+    console.log("ConexiÃ³n cerrada");
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
+// Eliminar un producto
+app.delete('/productos/:id', async (req, res) => {
+  const productId = req.params.id; // Obtener el ID del usuario a eliminar desde los parÃ¡metros de la solicitud
+  console.log(productId);
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colecciÃ³n
+    const db = client.db("EcoNido");
+    const collection = db.collection("products");
+
+    // Realizar la eliminaciÃ³n del usuario en la colecciÃ³n
+    const result = await collection.deleteOne({ _id: new ObjectId(productId) });  // Suponiendo que el ID del usuario sea Ãºnico
+
+    // Verificar si se eliminÃ³ el usuario correctamente
+    if (result.deletedCount === 1) {
+      console.log("Producto eliminado correctamente.");
+      res.status(200).send("Producto eliminado correctamente.");
+    } else {
+      console.log("El Producto no pudo ser encontrado o eliminado.");
+      res.status(404).send("El Producto no pudo ser encontrado o eliminado.");
+    }
+
+    // Cerrar la conexiÃ³n
+    client.close();
+    console.log("ConexiÃ³n cerrada");
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
   }
 });
 
