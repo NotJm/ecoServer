@@ -92,8 +92,50 @@ app.post('/device/sensor', async (req, res) => {
   }
 });
 
+/* *******************************************
+*
+*
+*           EMPRESA
+*
+*
+* ********************************************/
 
-// Para peticiones de contactos
+
+// Para peticioens de empresas
+app.get('/empresa', async (req, res) => {
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colecciÃ³n
+    const db = client.db("EcoNido");
+    const empresaCollection = db.collection("empresa");
+
+    // Realizar la consulta a la colecciÃ³n de usuarios
+    const empresa = await empresaCollection.find({}).toArray();
+
+    // Cerrar la conexiÃ³n
+    client.close();
+    console.log("ConexiÃ³n cerrada");
+
+    // Responder con los resultados de la consulta
+    res.json(empresa);
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
+/* *******************************************
+*
+*
+*           USUARIOS
+*
+*
+* ********************************************/
+
+// Para peticiones de contactos   
 app.post('/user/contacto', async (req, res) => {
   const data = req.body;
   try {
@@ -135,8 +177,6 @@ app.post('/user/contacto', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 })
-
-// Para peticioens de empresas
 
 // Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
 app.post('/user', async (req, res) => {
@@ -204,86 +244,95 @@ app.post('/user/login', async (req, res) => {
   }
 })
 
-// Para peticiones de edicion y eliminacion
-app.post('/user/edit', async (req, res) => {
-  const data = req.body;
-
+app.get('/usuarios', async (req, res) => {
+  console.log("entrepareverusaurios");
   try {
+    // Conectar a la base de datos MongoDB Atlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log("Conexion exitosa a MongoDB Atlas");
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
 
-    // Obtener una referencia a la base de datos y la colección de usuarios
+    // Obtener una referencia a la base de datos y la colecciÃ³n
     const db = client.db("EcoNido");
     const userCollection = db.collection("users");
 
-    // Comprobar si el usuario existe
-    const { username } = data;
-    const existingUser = await userCollection.findOne({ username: username });
+    // Realizar la consulta a la colecciÃ³n de usuarios
+    const users = await userCollection.find({}).toArray();
 
-    if (!existingUser) {
-      res.status(404).json({ status: false, message: 'Usuario no encontrado' });
+    // Cerrar la conexiÃ³n
+    client.close();
+    console.log("ConexiÃ³n cerrada");
+
+    // Responder con los resultados de la consulta
+    res.json(users);
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+app.delete('/delete/:id', async (req, res) => {
+  const userId = req.params.id; // Obtener el ID del usuario a eliminar desde los parÃ¡metros de la solicitud
+  console.log(userId);
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colecciÃ³n
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Realizar la eliminaciÃ³n del usuario en la colecciÃ³n
+    const result = await userCollection.deleteOne({ _id: new ObjectId(userId) });  // Suponiendo que el ID del usuario sea Ãºnico
+
+    // Verificar si se eliminÃ³ el usuario correctamente
+    if (result.deletedCount === 1) {
+      console.log("Usuario eliminado correctamente.");
+      res.status(200).send("Usuario eliminado correctamente.");
     } else {
-      // Realizar la acción de edición (actualización)
-      await userCollection.updateOne({ username: username }, { $set: data });
-      res.status(200).json({ status: true, message: 'Usuario actualizado con éxito' });
+      console.log("El usuario no pudo ser encontrado o eliminado.");
+      res.status(404).send("El usuario no pudo ser encontrado o eliminado.");
     }
 
+    // Cerrar la conexiÃ³n
     client.close();
+    console.log("ConexiÃ³n cerrada");
   } catch (error) {
-    console.error("Error al conectar MongoDB Atlas:", error);
-    res.status(500).json({ status: false, message: 'Error al conectar a la base de datos' });
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
   }
 });
 
-app.post('/user/delete', async (req, res) => {
-  const data = req.body;
-
+app.put('/editar/:id', async (req, res) => {
+  const userId = req.params.id; // Obtener el ID del usuario a editar desde los parÃ¡metros de la solicitud
+  const userData = req.body; // Obtener los datos del usuario a editar desde el cuerpo de la solicitud
+  console.log(userId);
   try {
+    // Conectar a la base de datos MongoDB Atlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log("Conexion exitosa a MongoDB Atlas");
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
 
-    // Obtener una referencia a la base de datos y la colección de usuarios
+    // Obtener una referencia a la base de datos y la colecciÃ³n
     const db = client.db("EcoNido");
     const userCollection = db.collection("users");
 
-    // Comprobar si el usuario existe
-    const { username } = data;
-    const existingUser = await userCollection.findOne({ username: username });
+    // Realizar la actualizaciÃ³n del usuario en la colecciÃ³n
+    const result = await userCollection.updateOne({ _id: new ObjectId(userId) }, { $set: userData });
 
-    if (!existingUser) {
-      res.status(404).json({ status: false, message: 'Usuario no encontrado' });
+    // Verificar si se actualizÃ³ el usuario correctamente
+    if (result.modifiedCount === 1) {
+      console.log("Usuario actualizado correctamente.");
+      res.status(200).send("Usuario actualizado correctamente.");
     } else {
-      // Realizar la acción de eliminación
-      await userCollection.deleteOne({ username: username });
-      res.status(200).json({ status: true, message: 'Usuario eliminado con éxito' });
+      console.log("El usuario no pudo ser encontrado o actualizado.");
+      res.status(404).send("El usuario no pudo ser encontrado o actualizado.");
     }
 
+    // Cerrar la conexiÃ³n
     client.close();
+    console.log("ConexiÃ³n cerrada");
   } catch (error) {
-    console.error("Error al conectar MongoDB Atlas:", error);
-    res.status(500).json({ status: false, message: 'Error al conectar a la base de datos' });
-  }
-});
-
-// Para obtener todos los usuarios
-app.get('/user/manage', async (req, res) => {
-  try {
-    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log("Conexión exitosa a MongoDB Atlas");
-
-    // Obtener una referencia a la base de datos y la colección de usuarios
-    const db = client.db("EcoNido");
-    const userCollection = db.collection("users");
-
-    // Obtener todos los usuarios
-    const allUsers = await userCollection.find({}).toArray();
-
-    res.status(200).json(allUsers);
-    
-    client.close();
-  } catch (error) {
-    console.error("Error al conectar MongoDB Atlas:", error);
-    res.status(500).json({ status: false, message: 'Error al conectar a la base de datos' });
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
   }
 });
 
