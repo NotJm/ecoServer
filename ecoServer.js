@@ -287,6 +287,37 @@ app.get('/user/manage', async (req, res) => {
   }
 });
 
+/* **********************************************
+*
+*
+*                  PRODUCTOS
+*
+*
+* ********************************************** */
+app.get('/productos', async (req, res) => {
+  try {
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colecciÃ³n
+    const db = client.db("EcoNido");
+    const productoCollection = db.collection("products");
+
+    // Realizar la consulta a la colecciÃ³n de usuarios
+    const products = await collection.find({}).toArray();
+
+    // Cerrar la conexiÃ³n
+    client.close();
+    console.log("ConexiÃ³n cerrada");
+
+    // Responder con los resultados de la consulta
+    res.json(products);
+  } catch (error) {
+    console.error("Error al obtener productos:", error);
+    res.status(500).send("Error al obtener productos");
+  }
+});
+
 
 
 // Manejo MQTT peticiones
