@@ -138,6 +138,7 @@ app.get('/empresa', async (req, res) => {
 // Para peticiones de contactos   
 app.post('/user/contacto', async (req, res) => {
   const data = req.body;
+
   try {
     const client = await MongoClient.connect(
       mongoUrl,
@@ -146,37 +147,28 @@ app.post('/user/contacto', async (req, res) => {
         useUnifiedTopology: true
       }
     );
-    console.log("Conexion exitosa a MongoDB Atlas");
+    console.log("Conexión exitosa a MongoDB Atlas");
 
     // Obtener una referencia a la base de datos y las colecciones
     const db = client.db("EcoNido");
     const questionCollection = db.collection("preguntas");
 
-    // Primero se comprueba si no existe el usuario
-    // const { email } = data;
-    // const exists = await questionCollection.findOne({ email: email });
+    // Insertar datos directamente sin verificar previamente
+    await questionCollection.insertOne(data);
 
-    questionCollection.insertOne(data);
-    // if (!exists) {
-    //   res.json({
-    //     title: "Question insert",
-    //     message: "Success",
-    //     status: true,
-    //   })
-    // } else {
-    //   res.json({
-    //     title: "Question exists",
-    //     message: "Failed",
-    //     status: false,
-    //   })
-    // }
+    res.json({
+      title: "Question insert",
+      message: "Success",
+      status: true,
+    });
 
+    // Cerrar la conexión después de todas las operaciones
     client.close();
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
   }
-})
+});
 
 // Ruta para recibir datos de mi ecoWeb (Registro de usuarios)
 app.post('/user', async (req, res) => {
