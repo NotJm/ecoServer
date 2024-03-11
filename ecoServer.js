@@ -153,23 +153,23 @@ app.post('/user/contacto', async (req, res) => {
     const questionCollection = db.collection("preguntas");
 
     // Primero se comprueba si no existe el usuario
-    const { email } = data;
-    const exists = await questionCollection.findOne({ email: email });
+    // const { email } = data;
+    // const exists = await questionCollection.findOne({ email: email });
 
-    if (!exists) {
-      questionCollection.insertOne(data);
-      res.json({
-        title: "Question insert",
-        message: "Success",
-        status: true,
-      })
-    } else {
-      res.json({
-        title: "Question exists",
-        message: "Failed",
-        status: false,
-      })
-    }
+    questionCollection.insertOne(data);
+    // if (!exists) {
+    //   res.json({
+    //     title: "Question insert",
+    //     message: "Success",
+    //     status: true,
+    //   })
+    // } else {
+    //   res.json({
+    //     title: "Question exists",
+    //     message: "Failed",
+    //     status: false,
+    //   })
+    // }
 
     client.close();
   } catch (error) {
@@ -244,7 +244,8 @@ app.post('/user/login', async (req, res) => {
   }
 })
 
-app.get('/usuarios', async (req, res) => {
+// Para obtener todos los usuarios
+app.get('/allusers', async (req, res) => {
   console.log("entrepareverusaurios");
   try {
     // Conectar a la base de datos MongoDB Atlas
@@ -269,7 +270,7 @@ app.get('/usuarios', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
-app.delete('/delete/:id', async (req, res) => {
+app.delete('/userdelete/:id', async (req, res) => {
   const userId = req.params.id; // Obtener el ID del usuario a eliminar desde los parÃ¡metros de la solicitud
   console.log(userId);
   try {
@@ -302,7 +303,7 @@ app.delete('/delete/:id', async (req, res) => {
   }
 });
 
-app.put('/editar/:id', async (req, res) => {
+app.put('/usereditar/:id', async (req, res) => {
   const userId = req.params.id; // Obtener el ID del usuario a editar desde los parÃ¡metros de la solicitud
   const userData = req.body; // Obtener los datos del usuario a editar desde el cuerpo de la solicitud
   console.log(userId);
