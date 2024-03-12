@@ -286,6 +286,43 @@ app.post('/userEmail', async (req, res) => {
   }
 });
 
+// Ruta para cambiar contraseña
+app.post('/updatePassword', async (req, res) => {
+  const { username, newPassword } = req.body;
+  let client;
+
+  try {
+      client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+      console.log('Conexión exitosa a MongoDB Atlas');
+
+      const db = client.db('EcoNido');
+      const userCollection = db.collection('users');
+
+      // Verificar si existe un usuario con el nombre de usuario proporcionado
+      const userToUpdate = await userCollection.findOne({ username: username });
+
+      if (userToUpdate) {
+          // Actualizar la contraseña del usuario
+          await userCollection.updateOne({ username: username }, { $set: { password: newPassword } });
+          res.json({ success: true, message: 'Contraseña actualizada exitosamente' });
+      } else {
+          // No existe un usuario con el nombre de usuario proporcionado
+          res.json({ success: false, message: 'Usuario no encontrado' });
+      }
+
+      console.log('Actualización de contraseña completada');
+
+  } catch (error) {
+      console.error('Error al conectar MongoDB Atlas:', error);
+      res.status(500).json({ error: 'Error al conectar a la base de datos' });
+  } finally {
+      if (client) {
+          await client.close();
+          console.log('Conexión cerrada');
+      }
+  }
+});
+
 // Para peticiones de login
 app.post('/user/login', async (req, res) => {
   const data = req.body;
