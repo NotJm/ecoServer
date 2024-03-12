@@ -238,7 +238,7 @@ app.post('/user', async (req, res) => {
       await userCollection.insertOne(data);
       res.send("Datos registrados satisfactoriamente");
     } else {
-      res.send("Los datos enviados ya existen");
+      res.status(400).send("Los datos enviados ya existen");
     }
 
     console.log("Datos recibidos del usuario");
