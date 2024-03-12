@@ -10,9 +10,7 @@ require('dotenv').config();
 
 // Configuracion del transporte
 const transporter = nodemailer.createTransport({
-  service: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
+  service: 'gmail',
   auth: {
     user: "econido.businesse@gmail.com",
     pass: "yrps pofi tjja axcg",
