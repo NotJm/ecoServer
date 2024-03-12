@@ -12,13 +12,13 @@ require('dotenv').config();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: "econido.businesse@gmail.com",
-    pass: "yrps pofi tjja axcg",
-  }
-})
+      user: 'econido.businesse@gmail.com',
+      pass: 'yrps pofi tjja axcg',
+  },
+});
 // Comentario
 const app = express();
-const port = 8080;
+const port = 3001;
 // Configuracion del puerto
 
 // Configurar middleware para analizar el cuerpo de las solicitudes HTTP
@@ -45,22 +45,21 @@ app.post('/email', (req, res) => {
   const { email } = req.body;
   const uniqueToken = uuid.v4();
   const mailOptions = {
-    from: "econido.businesse@gmail.com",
-    to: email,
-    subject: "Recuperacion de contraseña",
-    text: "Token unico para la recuperacion de contraseña:" + uniqueToken,
+      from: 'econido.businesse@gmail.com',
+      to: email,
+      subject: 'Recuperacion de contraseña',
+      text: `Token unico para la recuperacion de contraseña: ${uniqueToken}`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Error al enviar el correo electrónico:', error);
-      return res.status(500).json({ status: false, error: 'Error al enviar el correo electrónico', details: error });
-    } else {
-      console.log('Correo electrónico enviado:', info.response);
-      return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente', token: uniqueToken });
-    }
+      if (error) {
+          console.error('Error al enviar el correo electrónico:', error);
+          return res.status(500).json({ status: false, error: 'Error al enviar el correo electrónico', details: error });
+      } else {
+          console.log('Correo electrónico enviado:', info.response);
+          return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente', token: uniqueToken });
+      }
   });
-  
 });
 
 /* *******************************************
