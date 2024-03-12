@@ -12,8 +12,8 @@ require('dotenv').config();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-      user: 'econido.businesse@gmail.com',
-      pass: 'yrps pofi tjja axcg',
+    user: 'econido.businesse@gmail.com',
+    pass: 'yrps pofi tjja axcg',
   },
 });
 // Comentario
@@ -45,20 +45,20 @@ app.post('/email', (req, res) => {
   const { email } = req.body;
   const uniqueToken = uuid.v4();
   const mailOptions = {
-      from: 'econido.businesse@gmail.com',
-      to: email,
-      subject: 'Recuperacion de contraseña',
-      text: `Token unico para la recuperacion de contraseña: ${uniqueToken}`,
+    from: 'econido.businesse@gmail.com',
+    to: email,
+    subject: 'Recuperacion de contraseña',
+    text: `Token unico para la recuperacion de contraseña: ${uniqueToken}`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-          console.error('Error al enviar el correo electrónico:', error);
-          return res.status(500).json({ status: false, error: 'Error al enviar el correo electrónico', details: error });
-      } else {
-          console.log('Correo electrónico enviado:', info.response);
-          return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente', token: uniqueToken });
-      }
+    if (error) {
+      console.error('Error al enviar el correo electrónico:', error);
+      return res.status(500).json({ status: false, error: 'Error al enviar el correo electrónico', details: error });
+    } else {
+      console.log('Correo electrónico enviado:', info.response);
+      return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente', token: uniqueToken });
+    }
   });
 });
 
@@ -246,6 +246,43 @@ app.post('/user', async (req, res) => {
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
+// Ruta para verificar emails
+app.post('/userEmail', async (req, res) => {
+  const { email } = req.body;
+  let client;
+
+  try {
+    client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log('Conexión exitosa a MongoDB Atlas');
+
+    const db = client.db('EcoNido');
+    const userCollection = db.collection('users');
+
+    // Verificar si ya existe un usuario con el mismo correo electrónico
+    const userByEmail = await userCollection.findOne({ email: email });
+
+    if (userByEmail) {
+      // Ya existe un usuario con el mismo correo electrónico
+      res.json({ exists: true });
+    } else {
+      // No existe el usuario con el mismo correo electrónico
+      res.json({ exists: false });
+    }
+
+    console.log('Verificación de correo electrónico completada');
+
+  } catch (error) {
+    console.error('Error al conectar MongoDB Atlas:', error);
+    res.status(500).json({ error: 'Error al conectar a la base de datos' });
+  } finally {
+    // Asegúrate de cerrar la conexión en el bloque finally para manejar cualquier error y liberar recursos
+    if (client) {
+      await client.close();
+      console.log('Conexión cerrada');
+    }
   }
 });
 
