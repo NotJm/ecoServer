@@ -3,7 +3,17 @@ const bodyParser = require('body-parser');
 const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const mqtt = require("mqtt");
+const nodemailer = require('nodemailer');
 // Modulos utilizados
+
+// Configuracion del transporte
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: "econido.businesse@gmail.com",
+    pass: "20221065notjm",
+  }
+})
 
 const app = express();
 const port = 8080;
@@ -22,7 +32,41 @@ const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.
 // Cliente MQTT
 const mqttClient = mqtt.connect("mqtt://broker.hivemq.com");
 
+/* *******************************************
+*
+*
+*           FORGOTPASSWORD
+*
+*
+* ********************************************/
+app.post('/email', (req, res) => {
+  const { destinatario, asunto, cuerpo } = req.body;
 
+  const mailOptions = {
+    from: 'econido.businesse@gmail.com',
+    to: destinatario,
+    subject: asunto,
+    text: cuerpo,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error al enviar el correo electrónico:', error);
+      return res.status(500).json({ status: false, error: 'Error al enviar el correo electrónico' });
+    } else {
+      console.log('Correo electrónico enviado:', info.response);
+      return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente' });
+    }
+  });
+});
+
+/* *******************************************
+*
+*
+*           ESP32
+*
+*
+* ********************************************/
 // Ruta para recibir datos desde la ESP32
 app.post('/insertDevice', async (req, res) => {
   const data = req.body;
@@ -262,6 +306,8 @@ app.get('/allusers', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
+
+// Para eliminar usuarios
 app.delete('/userdelete/:id', async (req, res) => {
   const userId = req.params.id; // Obtener el ID del usuario a eliminar desde los parÃ¡metros de la solicitud
   console.log(userId);
@@ -295,7 +341,8 @@ app.delete('/userdelete/:id', async (req, res) => {
   }
 });
 
-app.put('/usereditar/:id', async (req, res) => {
+// Para editar usuarios
+app.put('/useredit/:id', async (req, res) => {
   const userId = req.params.id; // Obtener el ID del usuario a editar desde los parÃ¡metros de la solicitud
   const userData = req.body; // Obtener los datos del usuario a editar desde el cuerpo de la solicitud
   console.log(userId);
