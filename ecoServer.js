@@ -14,8 +14,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    user: "econido.businesse@gmail.com",
+    pass: "yrps pofi tjja axcg",
   }
 })
 
@@ -47,7 +47,7 @@ app.post('/email', (req, res) => {
   const { email } = req.body;
   const uniqueToken = uuid.v4();
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: "econido.businesse@gmail.com",
     to: email,
     subject: "Recuperacion de contraseña",
     text: "Token unico para la recuperacion de contraseña:" + uniqueToken,
