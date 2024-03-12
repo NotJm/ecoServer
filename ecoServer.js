@@ -5,14 +5,15 @@ const cors = require('cors');
 const mqtt = require("mqtt");
 const nodemailer = require('nodemailer');
 const uuid = require("uuid");
+require('dotenv').config();
 // Modulos utilizados
 
 // Configuracion del transporte
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: "econido.businesse@gmail.com",
-    pass: "20221065notjm",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   }
 })
 
@@ -44,7 +45,7 @@ app.post('/email', (req, res) => {
   const { email } = req.body;
   const uniqueToken = uuid.v4();
   const mailOptions = {
-    from: 'econido.businesse@gmail.com',
+    from: process.env.EMAIL_USER,
     to: email,
     subject: "Recuperacion de contraseña",
     text: "Token unico para la recuperacion de contraseña:" + uniqueToken,
@@ -53,12 +54,13 @@ app.post('/email', (req, res) => {
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error al enviar el correo electrónico:', error);
-      return res.status(500).json({ status: false, error: 'Error al enviar el correo electrónico' });
+      return res.status(500).json({ status: false, error: 'Error al enviar el correo electrónico', details: error });
     } else {
       console.log('Correo electrónico enviado:', info.response);
-      return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente', token: uniqueToken});
+      return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente', token: uniqueToken });
     }
   });
+  
 });
 
 /* *******************************************
