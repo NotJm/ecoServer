@@ -4,6 +4,7 @@ const { MongoClient, ObjectId } = require('mongodb');
 const cors = require('cors');
 const mqtt = require("mqtt");
 const nodemailer = require('nodemailer');
+const uuid = require("uuid");
 // Modulos utilizados
 
 // Configuracion del transporte
@@ -40,13 +41,13 @@ const mqttClient = mqtt.connect("mqtt://broker.hivemq.com");
 *
 * ********************************************/
 app.post('/email', (req, res) => {
-  const { destinatario, asunto, cuerpo } = req.body;
-
+  const { email } = req.body;
+  const uniqueToken = uuid.v4();
   const mailOptions = {
     from: 'econido.businesse@gmail.com',
-    to: destinatario,
-    subject: asunto,
-    text: cuerpo,
+    to: email,
+    subject: "Recuperacion de contraseña",
+    text: "Token unico para la recuperacion de contraseña:" + uniqueToken,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -55,7 +56,7 @@ app.post('/email', (req, res) => {
       return res.status(500).json({ status: false, error: 'Error al enviar el correo electrónico' });
     } else {
       console.log('Correo electrónico enviado:', info.response);
-      return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente' });
+      return res.status(200).json({ status: true, message: 'Correo electrónico enviado exitosamente', token: uniqueToken});
     }
   });
 });
