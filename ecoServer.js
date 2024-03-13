@@ -138,6 +138,7 @@ app.post('/device/sensor', async (req, res) => {
   }
 });
 
+// Para obtener las macs
 app.get('/device/mac', async (req, res) => {
   try {
     // Conectar a la base de datos MongoDB Atlas
@@ -162,6 +163,7 @@ app.get('/device/mac', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 })
+
 
 /* *******************************************
 *
@@ -473,6 +475,37 @@ app.put('/useredit/:id', async (req, res) => {
     console.log("ConexiÃ³n cerrada");
   } catch (error) {
     console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
+app.post('/user/assign/mac', async (req, res) => {
+  const data = req.body;
+  try {
+    // Validacion de datos
+    const { username, mac } = data;
+    if (!username || !mac) {
+      return res.status(400).send('Falta información de autenticación');
+    }
+
+    // Conectar a la base de datos MongoDBAtlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexion exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y las colecciones
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    const results = await userCollection.updateOne({ username: username }, { $set: { dispositivo: mac }});
+    if (results.modifiedCount > 0) {
+      res.status(200).send("Dispositivo asignado");
+    } else {
+      res.status(404).send("Error con el dispositivo asignado");
+    }
+    client.close();
+
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
