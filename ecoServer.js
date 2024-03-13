@@ -481,7 +481,7 @@ app.put('/useredit/:id', async (req, res) => {
 
 app.post('/user/assign/mac', async (req, res) => {
   const data = req.body;
-  return res.status(400).send(data);
+  return res.status(200).send(data);
   try {
     // Validacion de datos
     const { username, mac } = data;
