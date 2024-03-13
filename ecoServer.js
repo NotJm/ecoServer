@@ -497,11 +497,19 @@ app.post('/userassign', async (req, res) => {
     const db = client.db("EcoNido");
     const userCollection = db.collection("users");
 
-    const results = await userCollection.updateOne({ username: username }, { $set: { dispositivo: mac }});
-    if (results.modifiedCount > 0) {
-      res.status(200).send("Dispositivo asignado");
+    const results = await userCollection.updateOne({ username: username }, { $set: { dispositivo: mac } });
+    if (results.matchedCount > 0) {
+      // Al menos un documento coincidió con el filtro
+      if (results.modifiedCount > 0) {
+        // Documentos modificados, la actualización fue exitosa
+        res.status(200).send("Dispositivo asignado");
+      } else {
+        // Ningún documento modificado, pero al menos uno coincidió con el filtro
+        res.status(200).send("El dispositivo ya estaba asignado");
+      }
     } else {
-      res.status(404).send("Error con el dispositivo asignado");
+      // Ningún documento coincidió con el filtro, la actualización no fue exitosa
+      res.status(404).send("Usuario no encontrado");
     }
     client.close();
 
