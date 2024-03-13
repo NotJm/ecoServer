@@ -146,7 +146,7 @@ app.get('/device/mac', async (req, res) => {
 
     // Obtener una referencia a la base de datos y la colecciÃ³n
     const db = client.db("EcoNido");
-    const deviceCollection = db.collection("users");
+    const deviceCollection = db.collection("device");
 
     // Realizar la consulta a la colecciÃ³n de usuarios
     const mac = await deviceCollection.distinct("mac");
