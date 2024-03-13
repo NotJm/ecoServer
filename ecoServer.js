@@ -478,7 +478,9 @@ app.put('/useredit/:id', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
+
 app.post('/userassign', async (req, res) => {
+  console.log("sientreauserassign");
   const data = req.body;
   try {
     // Validacion de datos
