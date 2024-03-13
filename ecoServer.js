@@ -156,7 +156,7 @@ app.get('/device/mac', async (req, res) => {
     console.log("ConexiÃ³n cerrada");
 
     // Responder con los resultados de la consulta
-    res.json(MediaStreamTrack);
+    res.json(mac);
   } catch (error) {
     console.error("Error al conectar a MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
