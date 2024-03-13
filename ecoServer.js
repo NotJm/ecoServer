@@ -12,8 +12,8 @@ require('dotenv').config();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'econido.businesse@gmail.com',
-    pass: 'yrps pofi tjja axcg',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 // Comentario
@@ -29,10 +29,10 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-const mongoUrl = "mongodb+srv://notjm:tqsjTGz5oWJlOdm2@eco-nido.dbwpny9.mongodb.net/?retryWrites=true&w=majority&appName=Eco-Nido";
+const mongoUrl = process.env.MONGO_URL;
 
 // Cliente MQTT
-const mqttClient = mqtt.connect("mqtt://broker.hivemq.com");
+const mqttClient = mqtt.connect(process.env.MQTT_URL);
 
 /* *******************************************
 *
@@ -45,7 +45,7 @@ app.post('/email', (req, res) => {
   const { email } = req.body;
   const uniqueToken = uuid.v4();
   const mailOptions = {
-    from: 'econido.businesse@gmail.com',
+    from: process.env.EMAIL_USER,
     to: email,
     subject: 'Recuperacion de contraseña',
     text: `Token unico para la recuperacion de contraseña: ${uniqueToken}`,
@@ -137,6 +137,31 @@ app.post('/device/sensor', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
+
+app.get('/device/mac', async (req, res) => {
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colecciÃ³n
+    const db = client.db("EcoNido");
+    const deviceCollection = db.collection("users");
+
+    // Realizar la consulta a la colecciÃ³n de usuarios
+    const mac = await deviceCollection.distinct("mac");
+
+    // Cerrar la conexiÃ³n
+    client.close();
+    console.log("ConexiÃ³n cerrada");
+
+    // Responder con los resultados de la consulta
+    res.json(MediaStreamTrack);
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+})
 
 /* *******************************************
 *
@@ -292,34 +317,34 @@ app.post('/updatePassword', async (req, res) => {
   let client;
 
   try {
-      client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
-      console.log('Conexión exitosa a MongoDB Atlas');
+    client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log('Conexión exitosa a MongoDB Atlas');
 
-      const db = client.db('EcoNido');
-      const userCollection = db.collection('users');
+    const db = client.db('EcoNido');
+    const userCollection = db.collection('users');
 
-      // Verificar si existe un usuario con el nombre de usuario proporcionado
-      const userToUpdate = await userCollection.findOne({ username: username });
+    // Verificar si existe un usuario con el nombre de usuario proporcionado
+    const userToUpdate = await userCollection.findOne({ username: username });
 
-      if (userToUpdate) {
-          // Actualizar la contraseña del usuario
-          await userCollection.updateOne({ username: username }, { $set: { password: newPassword } });
-          res.json({ success: true, message: 'Contraseña actualizada exitosamente' });
-      } else {
-          // No existe un usuario con el nombre de usuario proporcionado
-          res.json({ success: false, message: 'Usuario no encontrado' });
-      }
+    if (userToUpdate) {
+      // Actualizar la contraseña del usuario
+      await userCollection.updateOne({ username: username }, { $set: { password: newPassword } });
+      res.json({ success: true, message: 'Contraseña actualizada exitosamente' });
+    } else {
+      // No existe un usuario con el nombre de usuario proporcionado
+      res.json({ success: false, message: 'Usuario no encontrado' });
+    }
 
-      console.log('Actualización de contraseña completada');
+    console.log('Actualización de contraseña completada');
 
   } catch (error) {
-      console.error('Error al conectar MongoDB Atlas:', error);
-      res.status(500).json({ error: 'Error al conectar a la base de datos' });
+    console.error('Error al conectar MongoDB Atlas:', error);
+    res.status(500).json({ error: 'Error al conectar a la base de datos' });
   } finally {
-      if (client) {
-          await client.close();
-          console.log('Conexión cerrada');
-      }
+    if (client) {
+      await client.close();
+      console.log('Conexión cerrada');
+    }
   }
 });
 
