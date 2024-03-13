@@ -485,7 +485,7 @@ app.post('/user/assign/mac', async (req, res) => {
     // Validacion de datos
     const { username, mac } = data;
     if (!username || !mac) {
-      return res.status(400).send('Falta información de autenticación');
+      return res.status(400).send(data);
     }
 
     // Conectar a la base de datos MongoDBAtlas
