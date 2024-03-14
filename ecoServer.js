@@ -586,8 +586,9 @@ app.post('/existsQuestion', async (req, res) => {
     if (user) {
       const { pregunta_secreta } = user;
       if (pregunta_secreta.trim() === "") {
-        res.status(200).json({ status: "exists", question: user.pregunta_secreta });
+        res.status(200).json({ status: "exists", question: pregunta_secreta });
       } else {
+        console.log(user);
         res.status(200).json({ status: "not found" });
       }
     } else {
