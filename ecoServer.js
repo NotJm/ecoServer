@@ -200,6 +200,50 @@ app.get('/empresa', async (req, res) => {
   }
 });
 
+// Para editar la empresa
+app.post('/empresa/edit', async (req, res) => {
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección
+    const db = client.db("EcoNido");
+    const empresaCollection = db.collection("empresa");
+
+    // Datos para editar
+    const { mision, vision, empresa, historia, valores, equipo } = req.body;
+
+    // Actualizar los datos de la empresa en la base de datos
+    const result = await empresaCollection.updateOne({}, {
+      $set: {
+        mision: mision,
+        vision: vision,
+        empresa: empresa,
+        historia: historia,
+        valores: valores,
+        equipo: equipo
+      }
+    });
+
+    // Verificar si se pudo actualizar correctamente
+    if (result.modifiedCount > 0) {
+      console.log("Datos de la empresa actualizados correctamente");
+      res.status(200).send("Datos de la empresa actualizados correctamente");
+    } else {
+      console.log("No se pudo actualizar los datos de la empresa");
+      res.status(404).send("No se pudo actualizar los datos de la empresa");
+    }
+
+    // Cerrar la conexión
+    client.close();
+    console.log("Conexión cerrada");
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
 /* *******************************************
 *
 *
