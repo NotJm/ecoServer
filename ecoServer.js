@@ -588,7 +588,7 @@ app.post('/existsQuestion', async (req, res) => {
       if (pregunta_secreta.trim() === "") {
         res.status(200).json({ status: "exists", question: user.pregunta_secreta });
       } else {
-        res.status(404).json({ status: "not found" });
+        res.status(200).json({ status: "not found" });
       }
     } else {
       res.status(404).send("Usuario no encontrado");
