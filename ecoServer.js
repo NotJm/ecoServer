@@ -567,8 +567,9 @@ app.post('/userassign', async (req, res) => {
 // Verificar si existe una pregunta en base al usuario
 app.post('/existsQuestion', async (req, res) => {
   const data = req.body;
+  const { username } = data;
   try {
-    const { username } = data;
+    
   
     // Conectar a la base de datos MongoDBAtlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -597,7 +598,7 @@ app.post('/existsQuestion', async (req, res) => {
 
   } catch (error) {
     console.error("Error al conectar MongoDB Atlas:", error);
-    res.status(500).send("Error al conectar a la base de datos:" + error);
+    res.status(500).send(`Error al conectar a la base de datos: ${error}, ${username}`);
   }
 })
 
