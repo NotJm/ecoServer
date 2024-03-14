@@ -580,7 +580,7 @@ app.post('/existsQuestion', async (req, res) => {
     const userCollection = db.collection("users");
 
     // Hacemos la consulta
-    const user = userCollection.findOne({ username: username });
+    const user = await userCollection.findOne({ username: username });
 
     // Hacemos la validaciones necesarias
     if (user) {
