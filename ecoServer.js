@@ -523,6 +523,7 @@ app.put('/useredit/:id', async (req, res) => {
   }
 });
 
+// Pendiente
 app.post('/userassign', async (req, res) => {
   console.log("sientreauserassign");
   const data = req.body;
@@ -562,6 +563,79 @@ app.post('/userassign', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
+
+// Verificar si existe una pregunta en base al usuario
+app.post('/existsQuestion', async (req, res) => {
+  const data = req.body;
+  try {
+    const { username } = data;
+  
+    // Conectar a la base de datos MongoDBAtlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexion exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y las colecciones
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Hacemos la consulta
+    const user = userCollection.findOne({ username: username });
+
+    // Hacemos la validaciones necesarias
+    if (user) {
+      if (user.pregunta_secreta && user.pregunta_secreta.trim() === "") {
+        res.status(200).json({ status: "exists", question: user.pregunta_secreta });
+      } else {
+        res.status(404).json({ status: "not found" });
+      }
+    } else {
+      res.status(404).send("Usuario no encontrado");
+    }
+
+    client.close();
+
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+})
+
+// Verificar si la respuesta que proporciono es correcta
+app.post('/checkAnswer', async (req, res) => {
+  const data = req.body;
+  try {
+    const { username, answer } = data;
+  
+    // Conectar a la base de datos MongoDBAtlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexion exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y las colecciones
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Hacemos la consulta
+    const user = await userCollection.findOne({ username: username });
+
+    // Hacemos la validación
+    if (user) {
+      if (user.respuesta_secreta === answer) {
+        res.status(200).json({ status: "correct" });
+      } else {
+        res.status(400).json({ status: "incorrect" });
+      }
+    } else {
+      res.status(404).send("Usuario no encontrado");
+    }
+
+    client.close();
+
+  } catch (error) {
+    console.error("Error al conectar MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
 
 /* **********************************************
 *
