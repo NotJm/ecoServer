@@ -586,14 +586,14 @@ app.post('/existsQuestion', async (req, res) => {
     if (user) {
       const { pregunta_secreta } = user;
       if (pregunta_secreta.trim() !== "") {
-        res.status(200).json({ status: "exists", resQuestion: pregunta_secreta });
+        res.status(200).json({ status: "exists", resQuestion: pregunta_secreta, user: user});
       } else {
         res.status(200).json({ status: "not found"});
       }
     } else {
       res.status(404).send("Usuario no encontrado");
     }
-
+    
     client.close();
 
   } catch (error) {
@@ -624,7 +624,7 @@ app.post('/checkAnswer', async (req, res) => {
       if (user.respuesta_secreta === answer) {
         res.status(200).json({ status: "correct" });
       } else {
-        res.status(400).json({ status: "incorrect" });
+        res.status(200).json({ status: "incorrect" });
       }
     } else {
       res.status(404).send("Usuario no encontrado");
