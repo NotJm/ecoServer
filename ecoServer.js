@@ -547,10 +547,10 @@ app.post('/userassign', async (req, res) => {
       // Al menos un documento coincidió con el filtro
       if (results.modifiedCount > 0) {
         // Documentos modificados, la actualización fue exitosa
-        res.status(200).send("Dispositivo asignado");
+        res.status(200).json({messages: "Dispositivo asignado"});
       } else {
         // Ningún documento modificado, pero al menos uno coincidió con el filtro
-        res.status(200).send("El dispositivo ya estaba asignado");
+        res.status(200).json({message:"El dispositivo ya estaba asignado"});
       }
     } else {
       // Ningún documento coincidió con el filtro, la actualización no fue exitosa
