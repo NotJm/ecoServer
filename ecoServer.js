@@ -454,6 +454,7 @@ app.get('/allusers', async (req, res) => {
   }
 });
 
+// Obtener domicilio
 app.get('/getdomicilio', async (req, res) => {
   const data = req.body;
   try {
@@ -467,6 +468,7 @@ app.get('/getdomicilio', async (req, res) => {
 
     // Obtener usuario 
     const { username } = data;
+    console.log(data);
     // Realizar la consulta a la colecciÃ³n de usuarios
     const expectedUser = await userCollection.findOne({ username: username })
 
@@ -484,6 +486,40 @@ app.get('/getdomicilio', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
+
+// Guardar datos de domicilio
+app.post('/savedomicilio', async (req, res) => {
+  const data = req.body;
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Obtener usuario 
+    const { username, domicilio } = data;
+
+    // Actualizar el domicilio del usuario en la base de datos
+    await userCollection.updateOne(
+      { username: username },
+      { $set: { domicilio: domicilio } }
+    );
+
+    // Regresar una respuesta exitosa
+    res.status(200).send("Domicilio guardado exitosamente");
+
+    // Cerrar la conexión
+    client.close();
+    console.log("Conexión cerrada");
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
 
 // Para eliminar usuarios
 app.delete('/userdelete/:id', async (req, res) => {
