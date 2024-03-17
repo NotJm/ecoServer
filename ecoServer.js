@@ -477,8 +477,6 @@ app.get('/getdomicilio', async (req, res) => {
     client.close();
     console.log("ConexiÃ³n cerrada");
 
-    // Responder con los resultados de la consulta
-    res.json(users);
   } catch (error) {
     console.error("Error al conectar a MongoDB Atlas:", error);
     res.status(500).send("Error al conectar a la base de datos");
