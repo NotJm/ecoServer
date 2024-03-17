@@ -456,7 +456,7 @@ app.get('/allusers', async (req, res) => {
 
 // Obtener domicilio
 app.get('/getdomicilio', async (req, res) => {
-  const data = req.body;
+  const data = req.query;
   try {
     // Conectar a la base de datos MongoDB Atlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
