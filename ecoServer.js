@@ -416,8 +416,8 @@ app.post('/user/login', async (req, res) => {
     if (!exists) {
       res.status(401).json({ status: false });
     } else {
-      const { permisos, dispositivo } = exists;
-      res.status(200).json({ status: true, tipo: permisos, dispositivo: dispositivo });
+      const { permisos, dispositivo, light, fan } = exists;
+      res.status(200).json({ status: true, tipo: permisos, dispositivo: dispositivo, lightState: light, fanState: fan});
     }
     client.close();
 
