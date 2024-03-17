@@ -417,7 +417,7 @@ app.post('/user/login', async (req, res) => {
       res.status(401).json({ status: false });
     } else {
       const { permisos, dispositivo } = exists;
-      res.status(200).json({ status: true, tipo: permisos, dispositivo: dispositivo});
+      res.status(200).json({ status: true, tipo: permisos, dispositivo: dispositivo });
     }
     client.close();
 
@@ -736,6 +736,49 @@ app.get('/productos', async (req, res) => {
     res.status(500).send("Error al obtener productos");
   }
 });
+
+app.post('/addproductos', async (req, res) => {
+  const productData = req.body; // Obtener los datos del producto desde el cuerpo de la solicitud
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección
+    const db = client.db("EcoNido");
+    const productCollection = db.collection("products");
+
+    // Verificar si el producto ya existe en la base de datos
+    const existingProduct = await productCollection.findOne({ name: productData.name });
+
+    // Si el producto ya existe, devolver un mensaje de error
+    if (existingProduct) {
+      console.log("El producto ya existe en la base de datos.");
+      res.status(400).send("El producto ya existe en la base de datos.");
+      return;
+    }
+
+    // Insertar el nuevo producto en la colección
+    const result = await productCollection.insertOne(productData);
+
+    // Verificar si se insertó el producto correctamente
+    if (result.insertedCount === 1) {
+      console.log("Producto insertado correctamente.");
+      res.status(200).send("Producto insertado correctamente.");
+    } else {
+      console.log("El producto no pudo ser insertado.");
+      res.status(500).send("El producto no pudo ser insertado.");
+    }
+
+    // Cerrar la conexión
+    client.close();
+    console.log("Conexión cerrada");
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos:" + error);
+  }
+});
+
 
 // Actualizar un producto existente
 app.put('/productosedit/:id', async (req, res) => {
