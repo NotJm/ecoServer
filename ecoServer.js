@@ -454,6 +454,37 @@ app.get('/allusers', async (req, res) => {
   }
 });
 
+app.get('/getdomicilio', async (req, res) => {
+  const data = req.body;
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("ConexiÃ³n exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colecciÃ³n
+    const db = client.db("EcoNido");
+    const userCollection = db.collection("users");
+
+    // Obtener usuario 
+    const { username } = data;
+    // Realizar la consulta a la colecciÃ³n de usuarios
+    const expectedUser = await userCollection.findOne({ username: username })
+
+    // Regresamos el usuario especificado 
+    res.status(200).json({ username: expectedUser });
+
+    // Cerrar la conexiÃ³n
+    client.close();
+    console.log("ConexiÃ³n cerrada");
+
+    // Responder con los resultados de la consulta
+    res.json(users);
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
 // Para eliminar usuarios
 app.delete('/userdelete/:id', async (req, res) => {
   const userId = req.params.id; // Obtener el ID del usuario a eliminar desde los parÃ¡metros de la solicitud
@@ -547,10 +578,10 @@ app.post('/userassign', async (req, res) => {
       // Al menos un documento coincidió con el filtro
       if (results.modifiedCount > 0) {
         // Documentos modificados, la actualización fue exitosa
-        res.status(200).json({messages: "Dispositivo asignado"});
+        res.status(200).json({ messages: "Dispositivo asignado" });
       } else {
         // Ningún documento modificado, pero al menos uno coincidió con el filtro
-        res.status(200).json({message:"El dispositivo ya estaba asignado"});
+        res.status(200).json({ message: "El dispositivo ya estaba asignado" });
       }
     } else {
       // Ningún documento coincidió con el filtro, la actualización no fue exitosa
@@ -569,8 +600,8 @@ app.post('/existsQuestion', async (req, res) => {
   const data = req.body;
   const { username } = data;
   try {
-    
-  
+
+
     // Conectar a la base de datos MongoDBAtlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log("Conexion exitosa a MongoDB Atlas");
@@ -586,14 +617,14 @@ app.post('/existsQuestion', async (req, res) => {
     if (user) {
       const { pregunta_secreta } = user;
       if (pregunta_secreta.trim() !== "") {
-        res.status(200).json({ status: "exists", resQuestion: pregunta_secreta});
+        res.status(200).json({ status: "exists", resQuestion: pregunta_secreta });
       } else {
-        res.status(200).json({ status: "not found"});
+        res.status(200).json({ status: "not found" });
       }
     } else {
       res.status(404).send("Usuario no encontrado");
     }
-    
+
     client.close();
 
   } catch (error) {
@@ -607,7 +638,7 @@ app.post('/checkAnswer', async (req, res) => {
   const data = req.body;
   try {
     const { username, answer } = data;
-  
+
     // Conectar a la base de datos MongoDBAtlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log("Conexion exitosa a MongoDB Atlas");
@@ -622,7 +653,7 @@ app.post('/checkAnswer', async (req, res) => {
     // Hacemos la validación
     if (user) {
       if (user.respuesta_secreta === answer) {
-        res.status(200).json({ status: "correct", dataUser: user});
+        res.status(200).json({ status: "correct", dataUser: user });
       } else {
         res.status(200).json({ status: "incorrect" });
       }
