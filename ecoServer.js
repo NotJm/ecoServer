@@ -470,6 +470,8 @@ app.get('/getdomicilio', async (req, res) => {
     // Realizar la consulta a la colecciÃ³n de usuarios
     const expectedUser = await userCollection.findOne({ username: username })
 
+    console.log(expectedUser)
+
     // Regresamos el usuario especificado 
     res.status(200).json({ username: expectedUser });
 
