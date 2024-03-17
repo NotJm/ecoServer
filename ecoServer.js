@@ -762,13 +762,8 @@ app.post('/addproductos', async (req, res) => {
     const result = await productCollection.insertOne(productData);
 
     // Verificar si se insertó el producto correctamente
-    if (result.insertedCount === 1) {
-      console.log("Producto insertado correctamente.");
-      res.status(200).send("Producto insertado correctamente.");
-    } else {
-      console.log("El producto no pudo ser insertado.");
-      res.status(500).send("El producto no pudo ser insertado.");
-    }
+    console.log("Producto insertado correctamente.");
+    res.status(200).send("Producto insertado correctamente.");
 
     // Cerrar la conexión
     client.close();
