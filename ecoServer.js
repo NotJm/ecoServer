@@ -847,7 +847,70 @@ app.delete('/productos/:id', async (req, res) => {
   }
 });
 
+/* **********************************************
+*
+*
+*                  PREGUNTAS
+*
+*
+* ********************************************** */
+// Endpoint para obtener las preguntas
+app.get('/preguntas', async (req, res) => {
+  try {
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
 
+    // Obtener una referencia a la base de datos y la colección
+    const db = client.db("EcoNido");
+    const preguntaCollection = db.collection("preguntas");
+
+    // Realizar la consulta a la colección de preguntas
+    const preguntas = await preguntaCollection.find({}).toArray();
+
+    // Cerrar la conexión
+    client.close();
+    console.log("Conexión cerrada");
+
+    // Responder con los resultados de la consulta
+    res.json(preguntas);
+  } catch (error) {
+    console.error("Error al obtener preguntas:", error);
+    res.status(500).send("Error al obtener preguntas");
+  }
+});
+
+// Endpoint para eliminar una pregunta por ID
+app.delete('/preguntas/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección
+    const db = client.db("EcoNido");
+    const preguntaCollection = db.collection("preguntas");
+
+    // Eliminar la pregunta por ID
+    const result = await preguntaCollection.deleteOne({ _id: ObjectId(id) });
+
+    // Verificar si se eliminó la pregunta correctamente
+    if (result.deletedCount === 1) {
+      console.log(`Pregunta con ID ${id} eliminada correctamente`);
+      res.status(200).send(`Pregunta con ID ${id} eliminada correctamente`);
+    } else {
+      console.log(`No se encontró ninguna pregunta con ID ${id}`);
+      res.status(404).send(`No se encontró ninguna pregunta con ID ${id}`);
+    }
+
+    // Cerrar la conexión
+    client.close();
+    console.log("Conexión cerrada");
+  } catch (error) {
+    console.error("Error al eliminar pregunta:", error);
+    res.status(500).send("Error al eliminar pregunta");
+  }
+});
 
 // Manejo MQTT peticiones
 const listen = (state) => {
