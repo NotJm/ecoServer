@@ -84,6 +84,7 @@ app.post('/insertDevice', async (req, res) => {
     const deviceHistoryCollection = db.collection("deviceHistory");
 
     const { mac } = data;
+    console.log(data);
     data.automatic = "1" ? true : false;
     data.light = "1" ? true : false;
     data.fan = "1" ? true : false ;
