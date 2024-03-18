@@ -83,11 +83,11 @@ app.post('/insertDevice', async (req, res) => {
     const deviceCollection = db.collection("device");
     const deviceHistoryCollection = db.collection("deviceHistory");
 
-    const { mac } = data;
-    console.log(data);
-    data.automatic = "1" ? true : false;
-    data.light = "1" ? true : false;
-    data.fan = "1" ? true : false ;
+    const { mac, light, fan, automatic } = data;
+    data.automatic = automatic === "1" ? true : false;
+    data.light = light === "1" ? true : false;
+    data.fan = fan === "1" ? true : false;
+
     const existsDevice = await deviceCollection.findOne({ mac: mac });
 
     // Comprobación de dispositivo
