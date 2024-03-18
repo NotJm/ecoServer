@@ -892,7 +892,7 @@ app.delete('/preguntas/:id', async (req, res) => {
     const preguntaCollection = db.collection("preguntas");
 
     // Eliminar la pregunta por ID
-    const result = await preguntaCollection.deleteOne({ _id: ObjectId(id) });
+    const result = await preguntaCollection.deleteOne({ _id: new ObjectId(id) });
 
     // Verificar si se eliminó la pregunta correctamente
     if (result.deletedCount === 1) {
