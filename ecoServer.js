@@ -774,7 +774,6 @@ app.post('/addproductos', async (req, res) => {
   }
 });
 
-
 // Actualizar un producto existente
 app.put('/productosedit/:id', async (req, res) => {
   const productId = req.params.id; // Obtener el ID del usuario a editar desde los parÃ¡metros de la solicitud
@@ -857,7 +856,7 @@ app.post('/mqtt', (req, res) => {
   console.log('Body:', req.body);
 
   const { state } = req.body;
-  if (!state || !['lightON', 'lightOFF', 'fanON', 'fanOFF'].includes(state)) {
+  if (!state || !['lightON', 'lightOFF', 'fanON', 'fanOFF', 'automaticEnable', 'automaticDisabled'].includes(state)) {
     return res.status(400).send('Parámetros inválidos');
   }
 
