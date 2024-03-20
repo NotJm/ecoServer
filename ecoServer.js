@@ -753,7 +753,7 @@ app.get('/productos/:id', async (req, res) => {
     const productoCollection = db.collection("products");
 
     // Realizar la consulta para encontrar el producto por su ID
-    const product = await productoCollection.findOne({ _id: ObjectId(productId) });
+    const product = await productoCollection.findOne({ _id: new ObjectId(productId) });
 
     // Cerrar la conexión
     client.close();
