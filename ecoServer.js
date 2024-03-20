@@ -916,7 +916,7 @@ app.delete('/preguntas/:id', async (req, res) => {
 
 app.get('/get/preguntas/frecuentes', async (req, res) => {
   // Conexion with mongo client
-  const mongoClient = await connect();
+  const mongoClient = connect();
   // Get database
   const db = mongoClient.db("EcoNido");
   // Get Collection
@@ -935,7 +935,7 @@ app.put('/edit/preguntas/frecuentes/:id', async (req, res) => {
   // Get body data
   const data = req.body;
   // Conexion with mongo client
-  const mongoClient = await connect();
+  const mongoClient = connect();
   // Get database
   const db = mongoClient.db("EcoNido");
   // Get Collection
