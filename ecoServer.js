@@ -742,6 +742,32 @@ app.get('/productos', async (req, res) => {
   }
 });
 
+app.get('/productos/:id', async (req, res) => {
+  try {
+    const productId = req.params.id; // Obtener el ID del producto de los parámetros de la URL
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección
+    const db = client.db("EcoNido");
+    const productoCollection = db.collection("products");
+
+    // Realizar la consulta para encontrar el producto por su ID
+    const product = await productoCollection.findOne({ _id: ObjectId(productId) });
+
+    // Cerrar la conexión
+    client.close();
+    console.log("Conexión cerrada");
+
+    // Responder con el resultado de la consulta
+    res.json(product);
+  } catch (error) {
+    console.error("Error al obtener producto:", error);
+    res.status(500).send("Error al obtener producto");
+  }
+});
+
+
 app.post('/addproductos', async (req, res) => {
   const productData = req.body; // Obtener los datos del producto desde el cuerpo de la solicitud
   try {
