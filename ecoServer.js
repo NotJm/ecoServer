@@ -923,10 +923,10 @@ app.get('/get/preguntas/frecuentes', async (req, res) => {
     const questionCollection = db.collection("preguntas_frecuentes");
     // Get Questions
     const questions = await questionCollection.find({}).toArray();
-    // Close client
-    client.close();
     // Send data for json
     res.send(200).json(questions);
+    // Close client
+    client.close();
   } catch (error) {
     res.status(500).send("Error:" + error);
   }
