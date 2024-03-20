@@ -992,6 +992,44 @@ app.delete('/delete/preguntas/frecuentes/:id', async (req, res) => {
 
 })
 
+app.post('/add/preguntas/frecuentes', async (req, res) => {
+  try {
+    // Obtener los datos de la pregunta del cuerpo de la solicitud
+    const data = req.body;
+
+    // Conexión con el cliente de MongoDB
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+
+    // Obtener la base de datos
+    const db = client.db("EcoNido");
+
+    // Obtener la colección de preguntas frecuentes
+    const questionCollection = db.collection("preguntas_frecuentes");
+
+    // Verificar si la pregunta ya existe en la colección
+    const existingQuestion = await questionCollection.findOne({ pregunta: data.pregunta });
+
+    if (existingQuestion) {
+      // Si la pregunta ya existe, responder con un mensaje de error
+      res.status(400).send("La pregunta ya existe");
+    } else {
+      // Si la pregunta no existe, insertarla en la colección
+      const result = await questionCollection.insertOne(data);
+
+      // Verificar si la pregunta se insertó correctamente
+      res.status(201).send("Pregunta agregada con éxito");
+    }
+
+    // Cerrar la conexión con la base de datos
+    client.close();
+  } catch (error) {
+    console.error("Error al agregar pregunta:", error);
+    res.status(500).send("Error al agregar la pregunta");
+  }
+});
+
+
+
 // Manejo MQTT peticiones
 const listen = (state) => {
   mqttClient.publish('ecoTopic', state);
