@@ -5,7 +5,6 @@ const cors = require('cors');
 const mqtt = require("mqtt");
 const nodemailer = require('nodemailer');
 const uuid = require("uuid");
-const { connect } = require('./modules/mongo.mod');
 require('dotenv').config();
 // Modulos utilizados
 
@@ -915,18 +914,22 @@ app.delete('/preguntas/:id', async (req, res) => {
 });
 
 app.get('/get/preguntas/frecuentes', async (req, res) => {
-  // Conexion with mongo client
-  const mongoClient = connect();
-  // Get database
-  const db = mongoClient.db("EcoNido");
-  // Get Collection
-  const questionCollection = db.collection("preguntas_frecuentes");
-  // Get Questions
-  const questions = questionCollection.find({}).toArray();
-  // Close client
-  mongoClient.close();
-  // Send data for json
-  res.send(200).json(questions);
+  try {
+    // Conexion with mongo client
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    // Get database
+    const db = client.db("EcoNido");
+    // Get Collection
+    const questionCollection = db.collection("preguntas_frecuentes");
+    // Get Questions
+    const questions = await questionCollection.find({}).toArray();
+    // Close client
+    client.close();
+    // Send data for json
+    res.send(200).json(questions);
+  } catch (error) {
+    res.status(500).send("Error:" + error);
+  }
 })
 
 app.put('/edit/preguntas/frecuentes/:id', async (req, res) => {
@@ -934,21 +937,57 @@ app.put('/edit/preguntas/frecuentes/:id', async (req, res) => {
   const id = req.params.id;
   // Get body data
   const data = req.body;
-  // Conexion with mongo client
-  const mongoClient = connect();
-  // Get database
-  const db = mongoClient.db("EcoNido");
-  // Get Collection
-  const questionCollection = db.collection("preguntas_frecuentes");
-  // Set data collection
-  const updateQuestion = questionCollection.updateOne(
-    { _id: new ObjectId(id) },
-    { $set: data }
-  );
-  if (updateQuestion.modifiedCount === 1) {
-    res.status(200).send("Update question");
-  } else {
-    res.status(404).send("Not Update Question");
+  try {
+    // Conexion with mongo client
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    // Get database
+    const db = client.db("EcoNido");
+    // Get Collection
+    const questionCollection = db.collection("preguntas_frecuentes");
+    // Set data collection
+    const updateQuestion = await questionCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: data }
+    );
+    if (updateQuestion.modifiedCount === 1) {
+      res.status(200).send("Update question");
+    } else {
+      res.status(404).send("Not Update Question");
+    }
+
+    client.close();
+
+  } catch (error) {
+    res.status(500).send("Error:" + error);
+  }
+
+})
+
+app.delete('/delete/preguntas/frecuentes/:id', async (req, res) => {
+  // Get id question
+  const id = req.params.id;
+  try {
+    // Conexion with mongo client
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    // Get database
+    const db = client.db("EcoNido");
+    // Get Collection
+    const questionCollection = db.collection("preguntas_frecuentes");
+    // Set data collection
+    const deleteQuestion = await questionCollection.deleteOne(
+      { _id: new ObjectId(id) }
+    );
+
+    if (deleteQuestion.deletedCount === 1) {
+      res.status(200).send("Update delete");
+    } else {
+      res.status(404).send("Not Deleted Question");
+    }
+
+    client.close();
+
+  } catch (error) {
+    res.status(500).send("Error:" + error);
   }
 
 })
