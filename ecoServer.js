@@ -5,6 +5,7 @@ const cors = require('cors');
 const mqtt = require("mqtt");
 const nodemailer = require('nodemailer');
 const uuid = require("uuid");
+const { connect } = require('./modules/mongo.mod');
 require('dotenv').config();
 // Modulos utilizados
 
@@ -717,6 +718,7 @@ app.post('/checkAnswer', async (req, res) => {
 *
 *
 * ********************************************** */
+
 app.get('/productos', async (req, res) => {
   try {
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -911,6 +913,45 @@ app.delete('/preguntas/:id', async (req, res) => {
     res.status(500).send("Error al eliminar pregunta");
   }
 });
+
+app.get('/get/preguntas/frecuentes', async (req, res) => {
+  // Conexion with mongo client
+  const mongoClient = await connect();
+  // Get database
+  const db = mongoClient.db("EcoNido");
+  // Get Collection
+  const questionCollection = db.collection("preguntas_frecuentes");
+  // Get Questions
+  const questions = questionCollection.find({}).toArray();
+  // Close client
+  mongoClient.close();
+  // Send data for json
+  res.send(200).json(questions);
+})
+
+app.put('/edit/preguntas/frecuentes/:id', async (req, res) => {
+  // Get id question
+  const id = req.params.id;
+  // Get body data
+  const data = req.body;
+  // Conexion with mongo client
+  const mongoClient = await connect();
+  // Get database
+  const db = mongoClient.db("EcoNido");
+  // Get Collection
+  const questionCollection = db.collection("preguntas_frecuentes");
+  // Set data collection
+  const updateQuestion = questionCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: data }
+  );
+  if (updateQuestion.modifiedCount === 1) {
+    res.status(200).send("Update question");
+  } else {
+    res.status(404).send("Not Update Question");
+  }
+
+})
 
 // Manejo MQTT peticiones
 const listen = (state) => {
