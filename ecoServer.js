@@ -99,7 +99,15 @@ app.get('/devices', async (req, res) => {
 app.delete('/devices/:mac', async (req, res) => {
   try {
     const { mac } = req.params;
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección
+    const db = client.db("EcoNido");
+    const deviceCollection = db.collection("device");
     await deviceCollection.deleteOne({ mac: mac });
+    client.close();
+    console.log("Conexión cerrada");
     res.status(200).send('Dispositivo eliminado correctamente');
   } catch (error) {
     console.error('Error deleting device:', error);
