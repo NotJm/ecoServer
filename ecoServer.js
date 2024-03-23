@@ -96,6 +96,17 @@ app.get('/devices', async (req, res) => {
   }
 });
 
+app.delete('/devices/:mac', async (req, res) => {
+  try {
+    const { mac } = req.params;
+    await deviceCollection.deleteOne({ mac: mac });
+    res.status(200).send('Dispositivo eliminado correctamente');
+  } catch (error) {
+    console.error('Error deleting device:', error);
+    res.status(500).send('Error al eliminar el dispositivo');
+  }
+});
+
 // Ruta para recibir datos desde la ESP32
 app.post('/insertDevice', async (req, res) => {
   const data = req.body;
