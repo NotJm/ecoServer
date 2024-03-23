@@ -69,6 +69,33 @@ app.post('/email', (req, res) => {
 *
 *
 * ********************************************/
+
+// Para obtener todos los dispositivos
+app.get('/devices', async (req, res) => {
+  try {
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y la colección
+    const db = client.db("EcoNido");
+    const deviceCollection = db.collection("device");
+
+    // Realizar la consulta para obtener todos los dispositivos
+    const devices = await deviceCollection.find({}).toArray();
+
+    // Cerrar la conexión
+    client.close();
+    console.log("Conexión cerrada");
+
+    // Responder con los resultados de la consulta
+    res.json(devices);
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
 // Ruta para recibir datos desde la ESP32
 app.post('/insertDevice', async (req, res) => {
   const data = req.body;
