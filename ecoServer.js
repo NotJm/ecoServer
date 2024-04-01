@@ -188,6 +188,32 @@ app.post('/device/sensor', async (req, res) => {
   }
 });
 
+app.get('/device/:mac/history', async (req, res) => {
+  const mac = req.params.mac;
+  
+  try {
+      const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+      console.log("Conexión exitosa a MongoDB Atlas");
+
+      const db = client.db("EcoNido");
+      const deviceCollection = db.collection("deviceHistory");
+
+      const history = await deviceCollection.findOne({ mac: mac });
+
+      if (!history) {
+          res.status(404).send("No se encontró el dispositivo: " + mac);
+          return;
+      }
+
+      res.json(history);
+
+      client.close();
+  } catch (error) {
+      console.error("Error al conectar MongoDB Atlas:", error);
+      res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
 // Para obtener las macs
 app.get('/device/mac', async (req, res) => {
   try {
