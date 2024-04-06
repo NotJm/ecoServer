@@ -96,6 +96,48 @@ app.get('/devices', async (req, res) => {
   }
 });
 
+// Endpoint para asignar un dispositivo por OTP
+app.post('/asignarDispositivo', async (req, res) => {
+  try {
+    const { dispositivo, otp, userId } = req.body;
+
+    // Conectar a la base de datos MongoDB Atlas
+    const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log("Conexión exitosa a MongoDB Atlas");
+
+    // Obtener una referencia a la base de datos y las colecciones
+    const db = client.db("EcoNido");
+    const deviceCollection = db.collection("device");
+    const userCollection = db.collection("users");
+
+    // Buscar el dispositivo por nombre y OTP
+    const device = await deviceCollection.findOne({ dispositivo: dispositivo, otp: otp });
+
+    if (device) {
+      // Dispositivo y OTP coinciden, realizar la asignación
+
+      // Actualizar el campo "asignado" en el documento del dispositivo
+      await deviceCollection.updateOne({ _id: device._id }, { $set: { asignado: true } });
+
+      // Actualizar el campo "dispositivo" del usuario en la colección de usuarios
+      await userCollection.updateOne({ _id: userId }, { $set: { dispositivo: dispositivo } });
+
+      // Cerrar la conexión
+      client.close();
+      console.log("Conexión cerrada");
+
+      // Responder con un mensaje de éxito
+      res.json({ success: true, message: "Dispositivo asignado correctamente" });
+    } else {
+      // Dispositivo o OTP no válidos, responder con un mensaje de error
+      res.status(400).json({ success: false, message: "Dispositivo o OTP no válidos" });
+    }
+  } catch (error) {
+    console.error("Error al conectar a MongoDB Atlas:", error);
+    res.status(500).send("Error al conectar a la base de datos");
+  }
+});
+
 app.delete('/devices/:mac', async (req, res) => {
   try {
     const { mac } = req.params;
