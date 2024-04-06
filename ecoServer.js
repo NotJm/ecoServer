@@ -99,7 +99,7 @@ app.get('/devices', async (req, res) => {
 // Endpoint para asignar un dispositivo por OTP
 app.post('/asignarDispositivo', async (req, res) => {
   try {
-    const { dispositivo, otp, userId } = req.body;
+    const { otp, userId } = req.body;
 
     // Conectar a la base de datos MongoDB Atlas
     const client = await MongoClient.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -111,16 +111,13 @@ app.post('/asignarDispositivo', async (req, res) => {
     const userCollection = db.collection("users");
 
     // Buscar el dispositivo por nombre y OTP
-    const device = await deviceCollection.findOne({ dispositivo: dispositivo, otp: otp });
+    const device = await deviceCollection.findOne({ otp: otp });
 
     if (device) {
       // Dispositivo y OTP coinciden, realizar la asignación
 
-      // Actualizar el campo "asignado" en el documento del dispositivo
-      await deviceCollection.updateOne({ _id: device._id }, { $set: { asignado: true } });
-
       // Actualizar el campo "dispositivo" del usuario en la colección de usuarios
-      await userCollection.updateOne({ _id: userId }, { $set: { dispositivo: dispositivo } });
+      await userCollection.updateOne({ _id: userId }, { $set: { dispositivo: device.mac } });
 
       // Cerrar la conexión
       client.close();
