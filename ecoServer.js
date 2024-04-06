@@ -124,7 +124,7 @@ app.post('/asignarDispositivo', async (req, res) => {
       console.log("Conexión cerrada");
 
       // Responder con un mensaje de éxito
-      res.json({ success: true, message: "Dispositivo asignado correctamente" });
+      res.json({ mac: device.mac, message: "Dispositivo asignado correctamente" });
     } else {
       // Dispositivo o OTP no válidos, responder con un mensaje de error
       res.status(400).json({ success: false, message: "Dispositivo o OTP no válidos" });
