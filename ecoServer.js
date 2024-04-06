@@ -118,6 +118,8 @@ app.post('/asignarDispositivo', async (req, res) => {
       // Dispositivo y OTP coinciden, realizar la asignación
 
       // Actualizar el campo "dispositivo" del usuario en la colección de usuarios
+      console.log(device.mac);
+      console.log(device[0].mac);
       await userCollection.updateOne({ _id: userId }, { $set: { dispositivo: device.mac } });
 
       // Cerrar la conexión
