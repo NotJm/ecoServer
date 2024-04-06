@@ -114,6 +114,7 @@ app.post('/asignarDispositivo', async (req, res) => {
     const device = await deviceCollection.findOne({ otp: otp });
 
     if (device) {
+      console.log(device);
       // Dispositivo y OTP coinciden, realizar la asignación
 
       // Actualizar el campo "dispositivo" del usuario en la colección de usuarios
