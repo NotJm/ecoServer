@@ -114,17 +114,25 @@ app.post('/asignarDispositivo', async (req, res) => {
     const device = await deviceCollection.findOne({ otp: otp });
 
     if (device) {
-      // Dispositivo y OTP coinciden, realizar la asignación
+      // Verificar si el dispositivo ya está asignado a un usuario
+      const assignedUser = await userCollection.findOne({ dispositivo: device.mac });
+      
+      if (assignedUser) {
+        // El dispositivo ya está asignado a un usuario, responder con un mensaje de error
+        res.status(400).json({ success: false, message: "El dispositivo ya está asignado a otro usuario" });
+      } else {
+        // Dispositivo y OTP coinciden y el dispositivo no está asignado a otro usuario, realizar la asignación
 
-      // Actualizar el campo "dispositivo" del usuario en la colección de usuarios
-      await userCollection.updateOne({ username: userId }, { $set: { dispositivo: device.mac } });
+        // Actualizar el campo "dispositivo" del usuario en la colección de usuarios
+        await userCollection.updateOne({ username: userId }, { $set: { dispositivo: device.mac } });
 
-      // Cerrar la conexión
-      client.close();
-      console.log("Conexión cerrada");
+        // Cerrar la conexión
+        client.close();
+        console.log("Conexión cerrada");
 
-      // Responder con un mensaje de éxito
-      res.json({ mac: device.mac, message: "Dispositivo asignado correctamente" });
+        // Responder con un mensaje de éxito
+        res.json({ mac: device.mac, message: "Dispositivo asignado correctamente" });
+      }
     } else {
       // Dispositivo o OTP no válidos, responder con un mensaje de error
       res.status(400).json({ success: false, message: "Dispositivo o OTP no válidos" });
@@ -134,6 +142,7 @@ app.post('/asignarDispositivo', async (req, res) => {
     res.status(500).send("Error al conectar a la base de datos");
   }
 });
+
 
 app.delete('/devices/:mac', async (req, res) => {
   try {
